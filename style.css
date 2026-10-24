@@ -333,3 +333,8 @@ button:disabled { opacity:.55; cursor:default; }
 .postcard-empty {color:var(--ink-soft);padding:2rem 0;border-top:1px solid var(--rule);}
 #postcard-status {font:.88rem/1.6 var(--body);color:var(--ink-soft);margin-top:1rem;}
 @media(max-width:700px){.guestbook-grid{grid-template-columns:1fr;}.postcard-fields{grid-template-columns:1fr;}.postcards{max-height:none;}}
+
+/* One quiet line so visitors find the court's action. */
+.art-hint { margin: 0.7rem var(--gutter) 0 0; text-align: right; font: 0.72rem var(--mono); letter-spacing: 0.03em; color: var(--ink-soft); }
+.art.no-webgl ~ .art-hint { display: none; }
+@media (max-width: 860px) { .art-hint { margin-right: 0; text-align: left; } }
