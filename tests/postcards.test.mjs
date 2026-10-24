@@ -4,7 +4,7 @@ import {DatabaseSync} from 'node:sqlite';
 import {mkdtempSync,readFileSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import worker from '../postcards-worker/worker.mjs';
+import worker,{postcardNotification} from '../postcards-worker/worker.mjs';
 
 function d1(file){
  const db=new DatabaseSync(file);
@@ -58,5 +58,30 @@ test('durable guestbook, moderation, sessions, validation and abuse limits',asyn
   const tooBig=new Request('https://postcards.example/api/postcards',{method:'POST',headers:{Origin:'https://postcards.example','Content-Type':'application/json'},body:'x'.repeat(9000)});
   assert.equal((await worker.fetch(tooBig,env)).status,400);
   assert.equal((await worker.fetch(request('/api/postcards'),{})).status,503,'Unconfigured storage never pretends to save.');
+ }finally{db.close();rmSync(directory,{recursive:true,force:true});}
+});
+
+test('owner is emailed once per new postcard, with header-safe content',async()=>{
+ const directory=mkdtempSync(join(tmpdir(),'henrik-postcard-mail-')),file=join(directory,'cards.sqlite');
+ const db=d1(file);db.exec(readFileSync(new URL('../postcards-worker/migrations/0001_postcards.sql',import.meta.url),'utf8'));
+ const sent=[];
+ const env={DB:db,ADMIN_PASSWORD:'test-only-secret-not-for-deployment',PUBLIC_ORIGINS:'https://henrik.example',NOTIFY:{send:async m=>{sent.push(m);}},NOTIFY_FROM:'postcards@henrik.example',NOTIFY_TO:'owner@henrik.example'};
+ const call=(path,body,extra)=>worker.fetch(request(path,body,extra),env);
+ try{
+  const card={...postcard(),name:'Eve\r\nBcc: victim@example.com',city:'São Paulo',message:'Olá!\nLine two.'};
+  assert.equal((await call('/api/postcards',card)).status,202);
+  assert.equal((await call('/api/postcards',card)).status,202);
+  assert.equal(sent.length,1,'A retried submission does not send a second email.');
+  const raw=sent[0].raw;
+  assert.equal(sent[0].to,'owner@henrik.example');
+  assert.match(raw,/^Subject: =\?UTF-8\?B\?[A-Za-z0-9+/=]+\?=\r\n/m,'Non-ASCII subject is RFC 2047 encoded.');
+  assert.ok(!/^Bcc:/m.test(raw),'Newlines in the name cannot inject headers.');
+  const body=Buffer.from(raw.split('\r\n\r\n')[1].replace(/\r\n/g,''),'base64').toString('utf8');
+  assert.match(body,/Olá!\nLine two\./);assert.match(body,/São Paulo/);assert.match(body,/https:\/\/postcards\.example\/admin/);
+  assert.ok(!body.includes('Bcc:'+'\n'),'Body carries the name as plain text only.');
+  const quiet={...env};delete quiet.NOTIFY;
+  assert.equal((await worker.fetch(request('/api/postcards',postcard()),quiet)).status,202,'Missing binding never blocks a postcard.');
+  assert.equal(sent.length,1);
+  assert.match(postcardNotification({id:'abc',name:'Ada',city:'',message:'hi',created_at:0},'a@b.example','c@d.example','https://x/admin'),/^Subject: New postcard from Ada\r\n/m);
  }finally{db.close();rmSync(directory,{recursive:true,force:true});}
 });

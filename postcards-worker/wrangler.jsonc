@@ -12,8 +12,13 @@
       "migrations_dir": "migrations"
     }
   ],
+  "send_email": [
+    { "name": "NOTIFY" }
+  ],
   "vars": {
     "PUBLIC_ORIGINS": "https://henrikhestnes.com,https://www.henrikhestnes.com,https://henrik-larsson-hestnes.pages.dev",
-    "ALLOW_FILE_PREVIEW": "false"
+    "ALLOW_FILE_PREVIEW": "false",
+    "NOTIFY_FROM": "postcards@henrikhestnes.com",
+    "NOTIFY_TO": "henrik.hestnes@hotmail.com"
   }
 }

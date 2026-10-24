@@ -58,10 +58,31 @@ function received(request){
  if((request.headers.get('Content-Type')||'').startsWith('application/json'))return json({ok:true,message:'Thank you. Your postcard will appear after Henrik approves it.'},202,publicHeaders);
  return new Response(null,{status:303,headers:{...security,Location:'/thanks'}});
 }
+// ---------- Owner notification: Cloudflare Email Workers send binding, no third party ----------
+const b64std=text=>btoa(String.fromCharCode(...enc.encode(text)));
+const headerSafe=value=>String(value).replace(/[\r\n]+/g,' ').trim();
+const encodedWord=value=>/^[\x20-\x7e]*$/.test(value)?value:`=?UTF-8?B?${b64std(value)}?=`;
+export function postcardNotification(card,from,to,adminUrl){
+ const name=headerSafe(card.name),city=headerSafe(card.city||'');
+ const subject=`New postcard from ${name}${city?` (${city})`:''}`;
+ const when=new Date(card.created_at);
+ const body=['A new postcard is waiting for you.','',`From: ${name}`,`City: ${city||'—'}`,`Sent: ${when.toUTCString()}`,'',card.message,'',`Review it: ${adminUrl}`,'','Nothing is public until you approve it.'].join('\r\n');
+ const encodedBody=b64std(body).replace(/.{76}/g,'$&\r\n');
+ return [`From: Postcards <${from}>`,`To: <${to}>`,`Subject: ${encodedWord(subject)}`,`Date: ${when.toUTCString()}`,`Message-ID: <${card.id}@${from.split('@')[1]||'postcards'}>`,'MIME-Version: 1.0','Content-Type: text/plain; charset=utf-8','Content-Transfer-Encoding: base64','',encodedBody,''].join('\r\n');
+}
+async function notifyOwner(env,card,adminUrl){
+ if(!env.NOTIFY||!env.NOTIFY_TO||!env.NOTIFY_FROM)return;
+ try{
+  const raw=postcardNotification(card,env.NOTIFY_FROM,env.NOTIFY_TO,adminUrl);
+  const mod=await import('cloudflare:email').catch(()=>null);
+  const message=mod?.EmailMessage?new mod.EmailMessage(env.NOTIFY_FROM,env.NOTIFY_TO,raw):{from:env.NOTIFY_FROM,to:env.NOTIFY_TO,raw};
+  await env.NOTIFY.send(message);
+ }catch(error){console.error('Postcard notification failed',error?.message||error);}
+}
 const thanks='<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Postcard received</title><style>body{max-width:36rem;margin:15vh auto;padding:2rem;background:#F2EBDD;color:#173C3A;font:18px/1.6 system-ui}h1{font-size:2.5rem}</style><h1>Postcard received.</h1><p>Thank you for saying hello. Your note will appear after Henrik approves it.</p><p>You can return to the homepage using your browser’s Back button.</p></html>';
 
 export default {
- async fetch(request,env){
+ async fetch(request,env,ctx){
   const url=new URL(request.url),path=url.pathname,method=request.method;
   const cors=path==='/api/postcards'?publicHeaders:{};
   try{
@@ -87,7 +108,12 @@ export default {
     if(typeof id!=='string'||! /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id))return json({error:'Please refresh the form and try again.'},400,publicHeaders);
     if(await env.DB.prepare('SELECT id FROM postcards WHERE id=?').bind(id).first())return received(request);
     if(!await rateLimit(request,env,'post',3,3600))return json({error:'You’ve sent a few postcards already. Please try again in an hour.'},429,{...publicHeaders,'Retry-After':'3600'});
-    await env.DB.prepare("INSERT INTO postcards(id,name,city,message,status,created_at) VALUES (?,?,?,?,'pending',?) ON CONFLICT(id) DO NOTHING").bind(id,name,city,message,Date.now()).run();
+    const createdAt=Date.now();
+    const inserted=await env.DB.prepare("INSERT INTO postcards(id,name,city,message,status,created_at) VALUES (?,?,?,?,'pending',?) ON CONFLICT(id) DO NOTHING").bind(id,name,city,message,createdAt).run();
+    if(inserted.meta?.changes!==0){
+     const notice=notifyOwner(env,{id,name,city,message,created_at:createdAt},`${url.origin}/admin`);
+     if(ctx?.waitUntil)ctx.waitUntil(notice);else await notice;
+    }
     return received(request);
    }
    if(path.startsWith('/api/admin/')){

@@ -40,6 +40,18 @@ The connector updates the homepage's API meta tag and native HTML form action, a
 
 `ALLOW_FILE_PREVIEW` stays false. Use the hosted Pages preview to submit postcards; a direct-file preview can only read approved notes. GET approved cards is intentionally readable cross-origin; there are no credentials on public requests. An empty API meta tag uses `/api/postcards`, suitable if the homepage is served by the same Worker with an ASSETS binding.
 
+## Email notification
+
+Each new postcard sends one email to the owner through Cloudflare's Email Workers `send_email` binding (`NOTIFY` in `wrangler.jsonc`). No third-party mail service, no API key. The subject is "New postcard from <name> (<city>)", the body carries the note and a link to `/admin`, and a retried submission never sends twice. If the binding or the addresses are missing, or sending fails, the postcard is still saved and the error is only logged.
+
+One-time setup in the Cloudflare dashboard (zone `henrikhestnes.com`):
+
+1. **Email → Email Routing → Get started**, and let Cloudflare add the MX and TXT records for the zone. The sender `NOTIFY_FROM` (`postcards@henrikhestnes.com`) must be on a zone with Email Routing enabled.
+2. **Email Routing → Destination addresses**: add the mailbox in `NOTIFY_TO` and click the verification link Cloudflare emails to it. Unverified destinations are refused at send time.
+3. Deploy the Worker (the `send_email` binding is created from `wrangler.jsonc`). Submit a test postcard from the homepage and check the inbox, including spam, for the first message.
+
+Change `NOTIFY_TO` in `wrangler.jsonc` to use a different mailbox; the new address must also be verified as a destination.
+
 ## Owner flow
 
 Visit `https://YOUR-WORKER.workers.dev/admin`, sign in, and choose **Publish postcard** for notes to make public. Published cards can also be deleted. The password never travels to the static homepage; sign-in uses the Worker's origin and a signed, HttpOnly, Secure, SameSite=Strict twelve-hour cookie. Changing the Worker secret invalidates existing sessions.
