@@ -1,1 +1,32 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#F2EBDD"/><path d="M8 44 L28 34 L56 42 L36 54 Z" fill="#D8BC8C" stroke="#173C3A" stroke-width="2.5" stroke-linejoin="round"/><circle cx="22" cy="24" r="9" fill="#C65B3A" stroke="#173C3A" stroke-width="2.5"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#173C3A"/>
+  <!-- polo -->
+  <path d="M3 64 C5 51 16 47 25 45 L32 54 L39 45 C48 47 59 51 61 64 Z" fill="#8E3140"/>
+  <!-- open collar -->
+  <path d="M25 45 L32 54 L32 50 L27.5 43 Z M39 45 L32 54 L32 50 L36.5 43 Z" fill="#A83C4C"/>
+  <circle cx="32" cy="56.5" r="0.9" fill="#F2EBDD"/>
+  <circle cx="32" cy="60" r="0.9" fill="#F2EBDD"/>
+  <!-- neck -->
+  <path d="M25.5 37 H38.5 V45 L32 52 L25.5 45 Z" fill="#E8B48C"/>
+  <!-- ears -->
+  <circle cx="16.5" cy="29.5" r="3.6" fill="#F1C9A5"/>
+  <circle cx="47.5" cy="29.5" r="3.6" fill="#F1C9A5"/>
+  <!-- head -->
+  <ellipse cx="32" cy="28" rx="14.5" ry="15.5" fill="#F1C9A5"/>
+  <!-- stubble beard along jaw and chin -->
+  <path d="M19.5 33 C21 40 26 43.5 32 43.5 C38 43.5 43 40 44.5 33 C42.5 38.5 38 41 32 41 C26 41 21.5 38.5 19.5 33 Z" fill="#D4A982"/>
+  <!-- hair: short sides, fringe swept across to the left -->
+  <path d="M17.6 27 C16.8 15 22 8 32 7.5 C41 7 46.8 13 46.4 25 C45.2 19.5 42.5 16.6 38.5 16.6 C33 16.8 26.5 19.2 22 24 C20.4 25.3 18.8 26.2 17.6 27 Z" fill="#F2DF9A"/>
+  <path d="M24 13 C27 9.5 32.5 8 38 9 C34 9.8 29 12 26 15.5 Z" fill="#F8EDBF"/>
+  <!-- eyes: blue with dark pupil -->
+  <circle cx="26.3" cy="28.3" r="2" fill="#5B8FB3"/>
+  <circle cx="37.7" cy="28.3" r="2" fill="#5B8FB3"/>
+  <circle cx="26.3" cy="28.3" r="1.1" fill="#173C3A"/>
+  <circle cx="37.7" cy="28.3" r="1.1" fill="#173C3A"/>
+  <!-- brows -->
+  <path d="M23.5 24.5 Q26.3 23 29 24.1 M35 24.1 Q37.7 23 40.5 24.5" fill="none" stroke="#D9BE72" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- grin -->
+  <path d="M23.5 33.5 Q32 42.5 40.5 33.5 Z" fill="#FFFFFF"/>
+  <path d="M23.5 33.5 Q32 42.5 40.5 33.5" fill="none" stroke="#173C3A" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M23.5 33.5 Q32 35.8 40.5 33.5" fill="none" stroke="#173C3A" stroke-width="1.3" stroke-linecap="round"/>
+</svg>

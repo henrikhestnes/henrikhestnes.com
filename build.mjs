@@ -3,7 +3,8 @@ import { cp, mkdir, rm } from 'node:fs/promises';
 // Publish only the homepage assets, never backend source, tests or local files.
 const files = [
   'index.html', 'style.css', 'scene.js', 'shark-motion.js', 'guestbook.js',
-  'poster.jpg', 'favicon.svg', 'snow-print.svg', 'norway.svg', 'brazil.svg',
+  'poster.jpg', 'og.jpg', 'favicon.svg', 'favicon.png', 'apple-touch-icon.png',
+  'snow-print.svg', 'norway.svg', 'brazil.svg',
   'fonts/BricolageGrotesque.woff2', 'fonts/LICENSE.md',
 ];
 const root = new URL('./', import.meta.url);
