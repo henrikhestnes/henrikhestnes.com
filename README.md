@@ -4,7 +4,7 @@ A personal homepage with three procedural sports illustrations and an original S
 
 ## Preview
 
-Hosted preview: https://henrik-larsson-hestnes.pages.dev. Cloudflare Pages serves the 12 public assets; backend source and tests are excluded. The shared guestbook is connected and accepting postcards; new notes await owner approval. See the backend README for verification details.
+Production: https://henrikhestnes.com. Cloudflare Workers Static Assets serves the 12 public assets assembled by `build.mjs`; backend source and tests are excluded. The original https://henrik-larsson-hestnes.pages.dev deployment is retained as a fallback during migration. The shared guestbook is connected and accepting postcards; new notes await owner approval. See the backend README for verification details.
 
 Open `index.html` in a browser, or serve the directory with a static HTTP server. The classic bootstrap imports pinned Three.js 0.180.0 from cdnjs. Internet is required for live 3D; the local poster, text, font and winter print remain available without it.
 
@@ -51,19 +51,23 @@ The motion tests check roster sizes, finite/continuous positions, constant ball 
 
 Pass 3 was reviewed in Safari and Chrome using file URLs. Confirmed action progression/completion, immediate sport selection followed by activation, keyboard activation, and zero requested animation frames during a ten-second idle observation. Chrome also reviewed 390px layouts and simulated reduced motion. The test instrumentation is temporary and is not part of the homepage.
 
-Local HTTP listeners are unavailable in this environment. Actual phone touch/performance, production HTTP/CDN timing and real screen-reader output have not been measured. Set an absolute `og:image` URL when a production domain is chosen. The shared postcard guestbook uses its own Cloudflare Worker and D1 database; see `postcards-worker/README.md` for deployment status and owner setup. The homepage never stores guestbook entries in localStorage.
+Local HTTP listeners are unavailable in this environment. Actual phone touch/performance, production HTTP/CDN timing and real screen-reader output have not been measured. The shared postcard guestbook uses its own Cloudflare Worker and D1 database; see `postcards-worker/README.md` for deployment status and owner setup. The homepage never stores guestbook entries in localStorage.
 
 ## Repository, deployment and domain
 
-Source lives in the `henrikhestnes.com` GitHub repository. Every push to `main` runs `.github/workflows/deploy.yml`: syntax checks and `node --test tests/shark-motion.test.js tests/postcards.test.mjs`, then a deploy of the 12 public assets to the Cloudflare Pages project `henrik-larsson-hestnes` and of `postcards-worker/` to the `henrik-postcards` Worker, both with `cloudflare/wrangler-action`.
+Source lives in the `henrikhestnes.com` GitHub repository. Cloudflare's built-in Git integration watches `main`, matching Fala Gringo's deployment model. GitHub Actions only runs tests; it does not deploy or require a Cloudflare token.
 
-The workflow needs one repository secret, `CLOUDFLARE_API_TOKEN`. Use an account-owned token with **Pages Write** on Henrik's account and **Individual Workers Editor** scoped only to `henrik-postcards`. Store the value directly in GitHub Settings → Secrets and variables → Actions; never put it in chat or source. Routine deployment needs no DNS or direct D1 permissions: the existing database binding is sufficient ([Cloudflare permissions documentation](https://developers.cloudflare.com/workers/authorization/workers/)). The account id is in the workflow and in `postcards-worker/wrangler.jsonc`; it is not secret.
+The static homepage Worker is named `henrikhestnes`. Its repository root contains `wrangler.jsonc`, pointing to `dist/`. Cloudflare's build command is:
 
-The owner password is a separate, already configured Cloudflare Worker secret named `ADMIN_PASSWORD`. Normal CI deployments preserve it; it does not need to be copied into GitHub. Set or rotate it only through the Worker's secret settings when needed.
+```sh
+node --test tests/shark-motion.test.js tests/postcards.test.mjs && node build.mjs
+```
 
-Production domain: **https://henrikhestnes.com** (with `www` redirecting to the apex). `og:url`, `og:image` and the canonical link point there, and `PUBLIC_ORIGINS` in `postcards-worker/wrangler.jsonc` lists the apex, `www`, and the `pages.dev` preview so the guestbook accepts cards from all three.
+The deploy command is `npx wrangler@4.152.0 deploy`. `build.mjs` copies an explicit list of public assets; do not deploy the repository root as a static directory.
 
-Cloudflare Registrar and DNS are active for this domain. Both the apex and `www` are attached to the existing Pages project using CNAME records. The zone's **WWW to apex** Single Redirect matches only `http.host eq "www.henrikhestnes.com"`, sends a 301 to `concat("https://henrikhestnes.com", http.request.uri.path)`, and preserves the query string. HTTPS homepage loading and the `www` redirect with `?sport=football` were verified in Chrome.
+The guestbook remains the separate `henrik-postcards` Worker, with its existing D1 database and `ADMIN_PASSWORD` secret. Its Cloudflare Git build uses `postcards-worker/` as the root directory, `npm test` as the build command, and `npx wrangler@4.152.0 deploy` as the deploy command. The owner password stays in Cloudflare and is preserved by normal deployments.
+
+Production domain: **https://henrikhestnes.com**. The zone's **WWW to apex** Single Redirect matches only `http.host eq "www.henrikhestnes.com"`, sends a 301 to `concat("https://henrikhestnes.com", http.request.uri.path)`, and preserves the query string. The canonical link and Open Graph URLs point to the apex. `PUBLIC_ORIGINS` in `postcards-worker/wrangler.jsonc` lists the apex, `www`, and the original `pages.dev` preview.
 
 ## Postcards
 
