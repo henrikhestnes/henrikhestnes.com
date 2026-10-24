@@ -1,0 +1,19 @@
+{
+  "name": "henrik-postcards",
+  "account_id": "2d9cd71eed7053be2a3685407e9035a5",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-10-23",
+  "workers_dev": true,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "henrik-postcards",
+      "database_id": "4f40f4d0-741c-47a7-b7b6-f7422eee1df7",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "vars": {
+    "PUBLIC_ORIGINS": "https://henrikhestnes.com,https://www.henrikhestnes.com,https://henrik-larsson-hestnes.pages.dev",
+    "ALLOW_FILE_PREVIEW": "false"
+  }
+}

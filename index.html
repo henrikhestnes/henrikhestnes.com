@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Henrik Larsson Hestnes</title>
+  <meta name="description" content="Henrik Larsson Hestnes is a Norwegian software engineer living in Brazil. Software, sport and somewhere new.">
+  <meta property="og:title" content="Henrik Larsson Hestnes">
+  <meta property="og:description" content="Software, sport & somewhere new.">
+  <meta property="og:image" content="https://henrikhestnes.com/poster.jpg">
+  <meta property="og:url" content="https://henrikhestnes.com/">
+  <link rel="canonical" href="https://henrikhestnes.com/">
+  <meta name="postcards-api" content="https://henrik-postcards.henrik-hestnes.workers.dev/api/postcards">
+  <meta name="theme-color" content="#F2EBDD">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="fonts/BricolageGrotesque.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="arc" viewBox="0 0 160 60">
+    <path d="M4 54 Q 60 -18 150 44" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="3 5" stroke-linecap="round"/>
+    <circle cx="150" cy="44" r="4.5" fill="currentColor"/>
+  </symbol>
+</svg>
+
+<header class="hero" id="top">
+  <div class="hero-text">
+    <h1 class="name"><span>Henrik</span><span>Larsson</span><span>Hestnes</span></h1>
+    <p class="tagline">Software, sport &amp; somewhere new.</p>
+    <p class="intro">I'm a Norwegian software engineer living in Brazil. I build useful things, love meeting people, and am usually up for a game.</p>
+    <nav class="hero-links" aria-label="Page">
+      <a href="#built">Things I've built <span aria-hidden="true">↓</span></a>
+      <a href="#hello">Say hello <span aria-hidden="true">↓</span></a>
+    </nav>
+  </div>
+
+  <div class="hero-art">
+    <div class="art-controls" role="group" aria-label="Change the game">
+      <span class="art-controls-label">Change the game</span>
+      <button type="button" disabled data-sport="futevolei" aria-pressed="true">Futevôlei</button>
+      <button type="button" disabled data-sport="tennis" aria-pressed="false">Tennis</button>
+      <button type="button" disabled data-sport="football" aria-pressed="false">Football</button>
+    </div>
+    <div class="art" id="art" role="button" tabindex="-1" aria-disabled="true" aria-label="A miniature futevôlei court with four players, a burgundy-and-white ball, net and bench.">
+      <img class="poster" src="poster.jpg" alt="" width="1200" height="840" decoding="async">
+      <canvas id="court" aria-hidden="true"></canvas>
+    </div>
+  </div>
+
+  <svg class="court-line" id="court-line" aria-hidden="true"></svg>
+</header>
+
+<main>
+  <section class="section" id="built">
+    <h2>Things I've built</h2>
+    <p class="lede">Small tools for my own week: learning a language, getting onto a court, making a Mac feel like home.</p>
+
+    <div class="stories">
+      <article class="story">
+        <div class="pane">
+          <div class="pane-bar"><span>fala-gringo</span><span>HTML · JS · PWA</span></div>
+          <div class="pane-body">
+            <h3><a href="https://falagringo.com">Fala Gringo</a></h3>
+            <p class="story-friction">Textbooks teach European Portuguese. I wanted to drill the spoken Brazilian kind, every day, without an account.</p>
+            <p>A free, offline-first site: you see English, you type the Portuguese. Verbs across five tenses, nouns with their gender, everyday expressions, full sentences, and seven daily cards you can share. No login, no tracking. It later grew sister sites for Brazilians learning English and Norwegian.</p>
+            <p class="links"><a href="https://falagringo.com">falagringo.com</a> · <a href="https://github.com/henrikhestnes/fala-gringo">source</a></p>
+          </div>
+        </div>
+        <svg class="arc arc-a" aria-hidden="true"><use href="#arc"/></svg>
+      </article>
+
+      <article class="story">
+        <div class="pane">
+          <div class="pane-bar"><span>autotennis</span><span>Python</span></div>
+          <div class="pane-body">
+            <h3><a href="https://github.com/henrikhestnes/Autotennis">Autotennis</a></h3>
+            <p class="story-friction">Drop-in tennis and padel sessions at the university club had to be booked by hand, and I wanted to be on court more often.</p>
+            <p>A small Python service that books the sessions for me. Built entirely without LLMs; it did exactly what I needed it to do.</p>
+            <p class="links"><a href="https://github.com/henrikhestnes/Autotennis">github.com/henrikhestnes/Autotennis</a></p>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <h3 class="index-title">Also on the desk</h3>
+    <ul class="index">
+      <li class="pane">
+        <div class="pane-bar"><span>macmural</span><span>Swift · AppKit</span></div>
+        <div class="pane-body"><a href="https://github.com/henrikhestnes/MacMural">MacMural</a><p>A native macOS menu bar app for drawing over your screen: arrows, rectangles, a laser pointer. No dependencies, no accounts, nothing running while idle.</p></div>
+      </li>
+      <li class="pane">
+        <div class="pane-bar"><span>macsnip</span><span>Swift · AppKit</span></div>
+        <div class="pane-body"><a href="https://github.com/henrikhestnes/MacSnip">MacSnip</a><p>An Ubuntu-style screenshot tool for the Mac menu bar. The screen freezes, a toolbar appears, the shot lands on the clipboard and on disk.</p></div>
+      </li>
+      <li class="pane">
+        <div class="pane-bar"><span>cuda-matmul</span><span>CUDA · Pybind11</span></div>
+        <div class="pane-body"><a href="https://github.com/henrikhestnes/CUDA-Pybind11-matrix-multiplication">CUDA matrix multiplication from Python</a><p>GPU-accelerated matrix multiplication exposed to Python through Pybind11. Built entirely without LLMs.</p></div>
+      </li>
+      <li class="pane">
+        <div class="pane-bar"><span>omniwm</span><span>Swift · contributor</span></div>
+        <div class="pane-body"><a href="https://omniwm.app">OmniWM</a><p>A tiling window manager for Apple Silicon Macs with scrolling columns and BSP layouts. I contribute to its development. The arrangement of these panes is a small nod to it.</p></div>
+      </li>
+    </ul>
+
+    <p class="dayjob">By day I'm a software engineer at <a href="https://www.solutionseeker.no">Solution Seeker</a>. M.Sc. in Cybernetics and Robotics from NTNU, with a lot of time spent on real-time systems and machine learning.</p>
+  </section>
+
+  <section class="section section-alt" id="away">
+    <h2>Away from the keyboard</h2>
+    <div class="away-grid">
+      <div class="away-text">
+        <p class="lede">Right now that means <strong>football</strong>, <strong>futevôlei</strong> and <strong>tennis</strong>, in whatever order the people around me are up for.</p>
+        <p>I grew up in Norway and live in Brazil, and I like that the two places ask different things of you. Travel is the same instinct: a new place is better learned slowly, with the people who live there.</p>
+        <p>A court to try, a new city, or a reason to get everyone together. I'm interested.</p>
+      </div>
+      <figure class="snow">
+        <img src="snow-print.svg" width="640" height="480" loading="lazy" alt="An original print of a patterned ball resting in snow beneath a pale winter sun.">
+        <figcaption>A change of scenery.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section" id="hello">
+    <h2>Fancy a game?</h2>
+    <p class="lede">Or a coffee, a code review, or a long argument about window managers. I'm easy to find.</p>
+    <ul class="contact">
+      <li><a href="https://github.com/henrikhestnes">GitHub<span>github.com/henrikhestnes</span></a></li>
+      <li><a href="https://www.linkedin.com/in/henrikhestnes/">LinkedIn<span>linkedin.com/in/henrikhestnes</span></a></li>
+    </ul>
+    <svg class="arc arc-b" aria-hidden="true"><use href="#arc"/></svg>
+  </section>
+  <section class="section guestbook" id="guestbook" aria-labelledby="guestbook-title">
+    <div class="guestbook-heading"><p class="eyebrow">A little mail from everywhere</p><h2 id="guestbook-title">Leave a postcard.</h2><p class="lede">A hello, a favourite place, or an invitation to play. I’d love to hear from you.</p></div>
+    <div class="guestbook-grid">
+      <form id="postcard-form" class="postcard-compose" action="https://henrik-postcards.henrik-hestnes.workers.dev/api/postcards" method="post">
+        <div class="postcard-address"><span>To: Henrik</span><span class="postcard-stamp" aria-hidden="true">HELLO<br>FROM<br>YOU ↗</span></div>
+        <label for="postcard-message">Your note</label><textarea id="postcard-message" name="message" rows="4" maxlength="500" required placeholder="Greetings from…"></textarea>
+        <div class="postcard-fields"><div><label for="postcard-name">Your name</label><input id="postcard-name" name="name" maxlength="60" required autocomplete="name"></div><div><label for="postcard-city">City <span>(optional)</span></label><input id="postcard-city" name="city" maxlength="80" autocomplete="address-level2"></div></div>
+        <div class="postcard-honeypot" aria-hidden="true"><label>Leave this blank<input name="website" tabindex="-1" autocomplete="off"></label></div>
+        <div class="postcard-send"><button type="submit">Send a postcard ↗</button><p>Notes appear here after I’ve read them.<br>Your name, city and note will be public.</p></div>
+      </form>
+      <div class="postcards-received"><p class="eyebrow">From the guestbook</p><div id="postcards" class="postcards"></div><p id="postcard-status" role="status" aria-live="polite">Opening the guestbook…</p><button id="postcard-retry" type="button" hidden>Try again</button><noscript><p>You can send a postcard with this form. Enable JavaScript to read the guestbook.</p></noscript></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p>Henrik Larsson Hestnes · Built by hand, no framework, no tracking.</p>
+  <p><a href="#top">Back to the court <span aria-hidden="true">↑</span></a></p>
+</footer>
+
+<script defer src="guestbook.js"></script>
+<script defer src="shark-motion.js"></script>
+<script defer src="scene.js"></script>
+</body>
+</html>

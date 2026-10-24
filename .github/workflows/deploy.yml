@@ -1,0 +1,56 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node --check scene.js && node --check shark-motion.js && node --check guestbook.js
+      - run: node --test tests/
+
+  pages:
+    name: Deploy homepage (Cloudflare Pages)
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemble public assets only
+        run: |
+          mkdir -p dist/fonts
+          cp index.html style.css scene.js shark-motion.js guestbook.js \
+             poster.jpg favicon.svg snow-print.svg norway.svg brazil.svg dist/
+          cp fonts/BricolageGrotesque.woff2 fonts/LICENSE.md dist/fonts/
+          ls -R dist
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: 2d9cd71eed7053be2a3685407e9035a5
+          command: pages deploy dist --project-name=henrik-larsson-hestnes --branch=main --commit-dirty=true
+
+  worker:
+    name: Deploy guestbook (Cloudflare Worker + D1)
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: 2d9cd71eed7053be2a3685407e9035a5
+          workingDirectory: postcards-worker
+          command: deploy

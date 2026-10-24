@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480" fill="none">
+<title>A change of scenery</title><desc>A patterned ball resting in snow, drawn as a two-colour print with a pale winter sun and sweeping snowdrifts.</desc>
+<defs>
+ <clipPath id="ball"><circle cx="335" cy="255" r="94"/></clipPath>
+ <pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-24)"><path d="M0 0V8" stroke="#2E4A5B" stroke-opacity=".14" stroke-width="1"/></pattern>
+ <pattern id="grain" width="17" height="19" patternUnits="userSpaceOnUse"><circle cx="3" cy="4" r=".8" fill="#173C3A" opacity=".17"/><circle cx="11" cy="13" r=".55" fill="#173C3A" opacity=".15"/></pattern>
+</defs>
+<circle cx="440" cy="130" r="64" fill="#D7DDCF"/>
+<circle cx="440" cy="130" r="79" stroke="#173C3A" stroke-opacity=".2" stroke-dasharray="2 7"/>
+<path d="M62 316C159 280 213 332 298 301S450 271 581 307" stroke="#2E4A5B" stroke-width="1.7"/>
+<path d="M104 296L183 279M102 303L155 291M496 286L533 296" stroke="#2E4A5B" stroke-opacity=".35" stroke-width="1.2"/>
+<ellipse cx="339" cy="342" rx="122" ry="18" fill="#2E4A5B" opacity=".07"/>
+<g clip-path="url(#ball)">
+ <circle cx="335" cy="255" r="94" fill="#912734"/>
+ <g fill="#F2EBDD" stroke="#6C2832" stroke-width="1.6" stroke-linejoin="round">
+  <path d="M333 199L390 241L406 181Z"/>
+  <path d="M390 241L368 302L440 287Z"/>
+  <path d="M368 302L300 302L333 363Z"/>
+  <path d="M300 302L279 241L227 284Z"/>
+  <path d="M279 241L333 199L264 179Z"/>
+  <path d="M264 179L333 166L315 143Z M406 181L440 225L464 180Z"/>
+ </g>
+ <path d="M333 204L384 243L364 296L305 296L285 243Z" stroke="#B95B64" stroke-width="1.4"/>
+ <path d="M370 162C462 223 405 347 309 349C396 302 410 240 370 162" fill="url(#hatch)"/>
+ <circle cx="335" cy="255" r="94" fill="url(#grain)"/>
+</g>
+<circle cx="335" cy="255" r="94" stroke="#173C3A" stroke-width="2"/>
+<path d="M63 358C150 312 219 369 283 332C332 302 382 313 425 327C478 345 509 319 582 340L582 414H63Z" fill="#EEE5D1"/>
+<path d="M63 358C150 312 219 369 283 332C332 302 382 313 425 327C478 345 509 319 582 340" stroke="#173C3A" stroke-width="2" stroke-linecap="round"/>
+<path d="M266 329C307 306 359 303 401 320M148 371C201 361 212 380 260 366M405 364C453 373 483 347 530 357M291 393C345 380 378 391 410 385" stroke="#2E4A5B" stroke-opacity=".45" stroke-width="1.3" stroke-linecap="round"/>
+<g fill="#2E4A5B"><circle cx="141" cy="175" r="2"/><circle cx="217" cy="100" r="2"/><circle cx="540" cy="229" r="2"/><circle cx="166" cy="238" r="1.5"/><circle cx="283" cy="124" r="1.5"/><circle cx="507" cy="85" r="1.5"/></g>
+<g stroke="#2E4A5B" stroke-width="1.2"><path d="M106 122V136M99 129H113M101 124L111 134M101 134L111 124"/><path d="M521 174V184M516 179H526"/><path d="M193 199V209M188 204H198"/></g>
+<path d="M62 422H578" stroke="#173C3A" stroke-opacity=".25"/>
+</svg>

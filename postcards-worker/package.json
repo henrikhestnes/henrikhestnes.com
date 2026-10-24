@@ -1,0 +1,13 @@
+{
+  "name": "henrik-postcards",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test ../tests/postcards.test.mjs",
+    "db:create": "wrangler d1 create henrik-postcards",
+    "db:migrate": "wrangler d1 migrations apply henrik-postcards --remote",
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  },
+  "devDependencies": { "wrangler": "4.139.0" }
+}
