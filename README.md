@@ -55,7 +55,7 @@ Local HTTP listeners are unavailable in this environment. Actual phone touch/per
 
 ## Repository, deployment and domain
 
-Source lives in the `henrikhestnes.com` GitHub repository. Every push to `main` runs `.github/workflows/deploy.yml`: syntax checks and `node --test tests/`, then a deploy of the 12 public assets to the Cloudflare Pages project `henrik-larsson-hestnes` and of `postcards-worker/` to the `henrik-postcards` Worker, both with `cloudflare/wrangler-action`.
+Source lives in the `henrikhestnes.com` GitHub repository. Every push to `main` runs `.github/workflows/deploy.yml`: syntax checks and `node --test tests/shark-motion.test.js tests/postcards.test.mjs`, then a deploy of the 12 public assets to the Cloudflare Pages project `henrik-larsson-hestnes` and of `postcards-worker/` to the `henrik-postcards` Worker, both with `cloudflare/wrangler-action`.
 
 The workflow needs one repository secret, `CLOUDFLARE_API_TOKEN`, with these permissions on Henrik's account: Cloudflare Pages: Edit, Workers Scripts: Edit, D1: Edit, and for the domain zone `henrikhestnes.com` DNS: Edit. The account id is in the workflow and in `postcards-worker/wrangler.jsonc`; it is not secret.
 

@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: 24
       - run: node --check scene.js && node --check shark-motion.js && node --check guestbook.js
-      - run: node --test tests/
+      - run: node --test tests/shark-motion.test.js tests/postcards.test.mjs
 
   pages:
     name: Deploy homepage (Cloudflare Pages)
