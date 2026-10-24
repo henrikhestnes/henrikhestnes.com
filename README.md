@@ -65,6 +65,6 @@ Production domain: **https://henrikhestnes.com** (with `www` redirecting to the 
 
 “Leave a postcard” sits below contact. Visitors provide a name, optional city and short note. Cards stay pending until Henrik approves them in the separate owner view. The form uses the shared endpoint in the `postcards-api` meta tag; a native form POST also works without JavaScript. The received-card list needs JavaScript. Unavailable service errors preserve input and offer retry.
 
-Run `node --test henrikhestnes/tests/` from the workspace root for motion and Worker tests. Pass 4 was visually reviewed in Chrome at desktop and 390px widths. The regenerated poster is 1200 × 840 (64,842 bytes).
+Run `node --test tests/shark-motion.test.js tests/postcards.test.mjs` from the repository root for motion and Worker tests. Pass 4 was visually reviewed in Chrome at desktop and 390px widths. The regenerated poster is 1200 × 840 (64,842 bytes).
 
 Pass 5 moves the match banner to the far touchline, corrects the penalty spot, removes the extended white baseline and captions, adds football’s diagonal and lowers the divider. Autotennis and CUDA matrix multiplication now explicitly state that they were built entirely without LLMs, as confirmed by Henrik.
