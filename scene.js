@@ -695,14 +695,14 @@ function animate(fn) { anims.add(fn); requestRender(); }
 
 new IntersectionObserver((entries) => {
   visible = entries[0].isIntersecting;
-  if (visible) requestRender(); else stopPoint();
+  if (visible) requestRender(); else resetPoint();
 }, { threshold: 0.01 }).observe(art);
 
 new ResizeObserver(resize).observe(art);
 addEventListener('resize', drawLine);
 document.fonts?.ready.then(drawLine);
 
-document.addEventListener('visibilitychange', () => { if (!document.hidden) requestRender(); else stopPoint(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) requestRender(); else resetPoint(); });
 canvas.addEventListener('webglcontextlost', (e) => {
   e.preventDefault();
   contextLost = true;
@@ -722,6 +722,8 @@ function stopPoint(){
  if(pointTick)anims.delete(pointTick);
  pointTick=null;pointPlaying=false;art.removeAttribute('data-playing');
 }
+// Abandoned or dismissed actions return to the resting pose, including the reduced-motion contact still.
+function resetPoint(){ stopPoint(); paintPoint(0); requestRender(); }
 function playPoint(){
  if(contextLost||!art.classList.contains('is-live'))return;
  stopPoint();
@@ -748,7 +750,7 @@ art.addEventListener('pointerup',e=>{
 art.addEventListener('click',()=>{if(!suppressClick)playPoint();suppressClick=false;});
 art.addEventListener('keydown',e=>{
  if(e.key==='Enter'||e.key===' '){e.preventDefault();if(!e.repeat)playPoint();}
- if(e.key==='Escape'&&pointPlaying){stopPoint();paintPoint(0);requestRender();}
+ if(e.key==='Escape')resetPoint();
 });
 function changeSport(name){
  if(!SPORTS[name])return;
