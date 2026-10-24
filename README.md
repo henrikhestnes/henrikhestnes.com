@@ -53,6 +53,14 @@ Pass 3 was reviewed in Safari and Chrome using file URLs. Confirmed action progr
 
 Local HTTP listeners are unavailable in this environment. Actual phone touch/performance, production HTTP/CDN timing and real screen-reader output have not been measured. Set an absolute `og:image` URL when a production domain is chosen. The shared postcard guestbook uses its own Cloudflare Worker and D1 database; see `postcards-worker/README.md` for deployment status and owner setup. The homepage never stores guestbook entries in localStorage.
 
+## Repository, deployment and domain
+
+Source lives in the `henrikhestnes.com` GitHub repository. Every push to `main` runs `.github/workflows/deploy.yml`: syntax checks and `node --test tests/`, then a deploy of the 12 public assets to the Cloudflare Pages project `henrik-larsson-hestnes` and of `postcards-worker/` to the `henrik-postcards` Worker, both with `cloudflare/wrangler-action`.
+
+The workflow needs one repository secret, `CLOUDFLARE_API_TOKEN`, with these permissions on Henrik's account: Cloudflare Pages: Edit, Workers Scripts: Edit, D1: Edit, and for the domain zone `henrikhestnes.com` DNS: Edit. The account id is in the workflow and in `postcards-worker/wrangler.jsonc`; it is not secret.
+
+Production domain: **https://henrikhestnes.com** (with `www` redirecting to the apex). `og:url`, `og:image` and the canonical link point there, and `PUBLIC_ORIGINS` in `postcards-worker/wrangler.jsonc` lists the apex, `www`, and the `pages.dev` preview so the guestbook accepts cards from all three.
+
 ## Postcards
 
 “Leave a postcard” sits below contact. Visitors provide a name, optional city and short note. Cards stay pending until Henrik approves them in the separate owner view. The form uses the shared endpoint in the `postcards-api` meta tag; a native form POST also works without JavaScript. The received-card list needs JavaScript. Unavailable service errors preserve input and offer retry.
