@@ -42,9 +42,9 @@ Open `tools/artwork.html`, select a sport, then click **Download artwork**. It c
 ## Validation
 
 ```sh
-node --check henrikhestnes/scene.js
-node --check henrikhestnes/shark-motion.js
-node henrikhestnes/tests/shark-motion.test.js
+node --check scene.js
+node --check shark-motion.js
+node --test tests/shark-motion.test.js tests/postcards.test.mjs
 ```
 
 The motion tests check roster sizes, finite/continuous positions, constant ball scale, floor and footvolley net clearance, server foot placement until contact, sole/racket/head contact and the header entering the goal mouth.
@@ -57,9 +57,13 @@ Local HTTP listeners are unavailable in this environment. Actual phone touch/per
 
 Source lives in the `henrikhestnes.com` GitHub repository. Every push to `main` runs `.github/workflows/deploy.yml`: syntax checks and `node --test tests/shark-motion.test.js tests/postcards.test.mjs`, then a deploy of the 12 public assets to the Cloudflare Pages project `henrik-larsson-hestnes` and of `postcards-worker/` to the `henrik-postcards` Worker, both with `cloudflare/wrangler-action`.
 
-The workflow needs one repository secret, `CLOUDFLARE_API_TOKEN`, with these permissions on Henrik's account: Cloudflare Pages: Edit, Workers Scripts: Edit, D1: Edit, and for the domain zone `henrikhestnes.com` DNS: Edit. The account id is in the workflow and in `postcards-worker/wrangler.jsonc`; it is not secret.
+The workflow needs one repository secret, `CLOUDFLARE_API_TOKEN`. Use an account-owned token with **Pages Write** on Henrik's account and **Individual Workers Editor** scoped only to `henrik-postcards`. Store the value directly in GitHub Settings → Secrets and variables → Actions; never put it in chat or source. Routine deployment needs no DNS or direct D1 permissions: the existing database binding is sufficient ([Cloudflare permissions documentation](https://developers.cloudflare.com/workers/authorization/workers/)). The account id is in the workflow and in `postcards-worker/wrangler.jsonc`; it is not secret.
+
+The owner password is a separate, already configured Cloudflare Worker secret named `ADMIN_PASSWORD`. Normal CI deployments preserve it; it does not need to be copied into GitHub. Set or rotate it only through the Worker's secret settings when needed.
 
 Production domain: **https://henrikhestnes.com** (with `www` redirecting to the apex). `og:url`, `og:image` and the canonical link point there, and `PUBLIC_ORIGINS` in `postcards-worker/wrangler.jsonc` lists the apex, `www`, and the `pages.dev` preview so the guestbook accepts cards from all three.
+
+Cloudflare Registrar and DNS are active for this domain. Both the apex and `www` are attached to the existing Pages project using CNAME records. The zone's **WWW to apex** Single Redirect matches only `http.host eq "www.henrikhestnes.com"`, sends a 301 to `concat("https://henrikhestnes.com", http.request.uri.path)`, and preserves the query string. HTTPS homepage loading and the `www` redirect with `?sport=football` were verified in Chrome.
 
 ## Postcards
 
