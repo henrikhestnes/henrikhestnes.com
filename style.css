@@ -179,7 +179,20 @@ canvas#court { display: block; touch-action: pan-y; cursor: pointer; }
   color: var(--ink-soft);
 }
 .pane-body { padding: 1.1rem 1.1rem 0.4rem; }
-.pane-body > a { font-family: var(--heading); font-weight: 600; font-size: 1.15rem; }
+.pane-body > a, .pane-body .with-badge > a { font-family: var(--heading); font-weight: 600; font-size: 1.15rem; }
+.with-badge { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35em 0.6em; }
+.badge {
+  display: inline-block;
+  font: 600 0.66rem/1 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--clay);
+  border: 1.5px solid var(--clay);
+  border-radius: 999px;
+  padding: 0.3em 0.6em 0.26em;
+  white-space: nowrap;
+  vertical-align: middle;
+}
 .pane-body p { margin-top: 0.4em; }
 .pane-body .links { font-family: var(--mono); font-size: 0.8rem; margin-top: 1em; }
 
