@@ -26,7 +26,7 @@ Ball radii remain the same at rest and in motion: 0.20 scene units for futevôle
 - `shark-motion.js`: deterministic motion sampling, roster definitions and short sequence durations.
 - `index.html` / `style.css`: content and responsive presentation. The full name appears in the hero, document title and metadata.
 - `poster.jpg`: a 1200 × 840 still of the current futevôlei scene.
-- `og.jpg`: the same still letterboxed to 1200 × 630 on paper, for link previews (Messenger, WhatsApp, Slack, X).
+- `og.jpg`: the 1200 × 630 link-preview card (Messenger, WhatsApp, Slack, X): the cartoon portrait, name and tagline on paper. Regenerate by screenshotting `tools/og-card.html` at 1200 × 630.
 - `favicon.svg`, `favicon.png`, `apple-touch-icon.png`: a flat cartoon portrait on ink; the PNGs cover Safari and iOS home screens.
 - `snow-print.svg`: original winter illustration with the burgundy-and-white ball.
 - `fonts/`: Bricolage Grotesque and its license.
