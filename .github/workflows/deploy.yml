@@ -1,4 +1,4 @@
-name: Tests
+name: Tests and deploy
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: tests
+  group: deploy
   cancel-in-progress: false
 
 jobs:
@@ -22,3 +22,35 @@ jobs:
           node-version: 24
       - run: node --check scene.js && node --check shark-motion.js && node --check guestbook.js
       - run: node --test tests/shark-motion.test.js tests/postcards.test.mjs
+
+  pages:
+    name: Deploy homepage (Cloudflare Pages)
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node build.mjs
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: 2d9cd71eed7053be2a3685407e9035a5
+          wranglerVersion: "4.139.0"
+          command: pages deploy dist --project-name=henrik-larsson-hestnes --branch=main --commit-dirty=true
+
+  # The guestbook Worker is deployed from the Cloudflare dashboard for now: the CI token
+  # is scoped to this one Worker and wrangler's pre-upload check needs account-level
+  # Workers read access. Re-enable once the token has that scope.
+  # worker:
+  #   needs: test
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: cloudflare/wrangler-action@v3
+  #       with:
+  #         apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  #         accountId: 2d9cd71eed7053be2a3685407e9035a5
+  #         wranglerVersion: "4.139.0"
+  #         command: deploy --config postcards-worker/wrangler.jsonc
