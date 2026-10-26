@@ -69,6 +69,8 @@ The deploy command is `npx wrangler@4.152.0 deploy`. `build.mjs` copies an expli
 
 The guestbook remains the separate `henrik-postcards` Worker, with its existing D1 database and `ADMIN_PASSWORD` secret. Its Cloudflare Git build uses `postcards-worker/` as the root directory, `npm test` as the build command, and `npx wrangler@4.152.0 deploy` as the deploy command. The owner password stays in Cloudflare and is preserved by normal deployments.
 
+Email Routing, the WWW redirect and the D1 database are declared in Terraform under `infra/`; see `infra/README.md`. The Workers stay in their `wrangler.jsonc` files.
+
 Production domain: **https://henrikhestnes.com**. The zone's **WWW to apex** Single Redirect matches only `http.host eq "www.henrikhestnes.com"`, sends a 301 to `concat("https://henrikhestnes.com", http.request.uri.path)`, and preserves the query string. The canonical link and Open Graph URLs point to the apex. `PUBLIC_ORIGINS` in `postcards-worker/wrangler.jsonc` lists the apex, `www`, and the original `pages.dev` preview.
 
 ## Postcards
