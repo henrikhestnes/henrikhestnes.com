@@ -97,14 +97,18 @@
         </div>
       </article>
 
-      <article class="story">
+      <article class="story story-wide">
         <div class="pane">
           <div class="pane-bar"><span>cuda-matmul</span><span>CUDA · Pybind11 · <span class="badge" title="Written by hand, without any AI assistance">No LLMs</span></span></div>
           <div class="pane-body">
-            <h3><a href="https://github.com/henrikhestnes/CUDA-Pybind11-matrix-multiplication">CUDA matrix multiplication from Python</a></h3>
-            <p class="story-friction">NumPy makes a matrix multiply one character long. I wanted to know what the GPU actually does underneath, and to call my own version from Python.</p>
-            <p>Two CUDA kernels written by hand: one reads straight from global memory, the other stages 32×32 tiles in shared memory. Pybind11 exposes them to Python as plain functions on NumPy arrays, and any matrix size works, not just multiples of the tile. A small script races them against a C++ loop, NumPy and pure Python, and checks every result. Built entirely without LLMs.</p>
-            <p class="links"><a href="https://github.com/henrikhestnes/CUDA-Pybind11-matrix-multiplication">github.com/henrikhestnes/CUDA-Pybind11-matrix-multiplication</a></p>
+            <div>
+              <h3><a href="https://github.com/henrikhestnes/CUDA-Pybind11-matrix-multiplication">CUDA matrix multiplication from Python</a></h3>
+              <p class="story-friction">NumPy makes a matrix multiply one character long. I wanted to know what the GPU actually does underneath, and to call my own version from Python.</p>
+            </div>
+            <div>
+              <p>Two CUDA kernels written by hand: one reads straight from global memory, the other stages 32×32 tiles in shared memory. Pybind11 exposes them to Python as plain functions on NumPy arrays, and any matrix size works, not just multiples of the tile. A small script races them against a C++ loop, NumPy and pure Python, and checks every result. Built entirely without LLMs.</p>
+              <p class="links"><a href="https://github.com/henrikhestnes/CUDA-Pybind11-matrix-multiplication">github.com/henrikhestnes/CUDA-Pybind11-matrix-multiplication</a></p>
+            </div>
           </div>
         </div>
       </article>
