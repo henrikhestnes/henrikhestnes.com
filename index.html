@@ -72,17 +72,33 @@
     <p class="lede">Small tools for my own week: learning a language, getting onto a court, making a Mac feel like home.</p>
 
     <div class="stories">
-      <article class="story">
+      <article class="story story-wide">
         <div class="pane">
           <div class="pane-bar"><span>fala-gringo</span><span>HTML · JS · PWA</span></div>
           <div class="pane-body">
-            <h3><a href="https://falagringo.com">Fala Gringo</a></h3>
-            <p class="story-friction">Textbooks teach European Portuguese. I wanted to drill the spoken Brazilian kind, every day, without an account.</p>
-            <p>A free, offline-first site: you see English, you type the Portuguese. Verbs across five tenses, nouns with their gender, everyday expressions, full sentences, and seven daily cards you can share. No login, no tracking. It later grew sister sites for Brazilians learning English and Norwegian.</p>
-            <p class="links"><a href="https://falagringo.com">falagringo.com</a> · <a href="https://github.com/henrikhestnes/fala-gringo">source</a></p>
+            <div>
+              <h3><a href="https://falagringo.com">Fala Gringo</a></h3>
+              <p class="story-friction">Textbooks teach European Portuguese. I wanted to drill the spoken Brazilian kind, every day, without an account.</p>
+            </div>
+            <div>
+              <p>A free, offline-first site: you see English, you type the Portuguese. Verbs across five tenses, nouns with their gender, everyday expressions, full sentences, and seven daily cards you can share. No login, no tracking. It later grew sister sites for Brazilians learning English and Norwegian.</p>
+              <p class="links"><a href="https://falagringo.com">falagringo.com</a> · <a href="https://github.com/henrikhestnes/fala-gringo">source</a></p>
+            </div>
           </div>
         </div>
         <svg class="arc arc-a" aria-hidden="true"><use href="#arc"/></svg>
+      </article>
+
+      <article class="story">
+        <div class="pane">
+          <div class="pane-bar"><span>cuda-matmul</span><span>CUDA · Pybind11 · <span class="badge" title="Written by hand, without any AI assistance">No LLMs</span></span></div>
+          <div class="pane-body">
+            <h3><a href="https://github.com/henrikhestnes/CUDA-Pybind11-matrix-multiplication">GPU-accelerated CUDA matrix multiplication from Python</a></h3>
+            <p class="story-friction">NumPy makes a matrix multiply one character long. I wanted to know what the GPU actually does underneath, and to call my own version from Python.</p>
+            <p>Two CUDA kernels written by hand: one reads straight from global memory, the other stages 32×32 tiles in shared memory. Pybind11 exposes them to Python as plain functions on NumPy arrays, and any matrix size works, not just multiples of the tile. A small script races them against a C++ loop, NumPy and pure Python, and checks every result. Built entirely without LLMs.</p>
+            <p class="links"><a href="https://github.com/henrikhestnes/CUDA-Pybind11-matrix-multiplication">github.com/henrikhestnes/CUDA-Pybind11-matrix-multiplication</a></p>
+          </div>
+        </div>
       </article>
 
       <article class="story">
@@ -93,22 +109,6 @@
             <p class="story-friction">Drop-in tennis and padel sessions at the university club had to be booked by hand, and I wanted to be on court more often.</p>
             <p>A small Python service that books the sessions for me. Built entirely without LLMs; it did exactly what I needed it to do.</p>
             <p class="links"><a href="https://github.com/henrikhestnes/Autotennis">github.com/henrikhestnes/Autotennis</a></p>
-          </div>
-        </div>
-      </article>
-
-      <article class="story story-wide">
-        <div class="pane">
-          <div class="pane-bar"><span>cuda-matmul</span><span>CUDA · Pybind11 · <span class="badge" title="Written by hand, without any AI assistance">No LLMs</span></span></div>
-          <div class="pane-body">
-            <div>
-              <h3><a href="https://github.com/henrikhestnes/CUDA-Pybind11-matrix-multiplication">CUDA matrix multiplication from Python</a></h3>
-              <p class="story-friction">NumPy makes a matrix multiply one character long. I wanted to know what the GPU actually does underneath, and to call my own version from Python.</p>
-            </div>
-            <div>
-              <p>Two CUDA kernels written by hand: one reads straight from global memory, the other stages 32×32 tiles in shared memory. Pybind11 exposes them to Python as plain functions on NumPy arrays, and any matrix size works, not just multiples of the tile. A small script races them against a C++ loop, NumPy and pure Python, and checks every result. Built entirely without LLMs.</p>
-              <p class="links"><a href="https://github.com/henrikhestnes/CUDA-Pybind11-matrix-multiplication">github.com/henrikhestnes/CUDA-Pybind11-matrix-multiplication</a></p>
-            </div>
           </div>
         </div>
       </article>
