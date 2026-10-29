@@ -219,6 +219,7 @@ canvas#court { display: block; touch-action: pan-y; cursor: pointer; }
 }
 .index .pane { border: 0; }
 .index .pane-body p { font-size: 0.95rem; }
+.index > li:last-child:nth-child(odd) { grid-column: 1 / -1; }
 
 @media (max-width: 700px) {
   .index { grid-template-columns: minmax(0, 1fr); }
