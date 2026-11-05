@@ -22,6 +22,8 @@
       --sheet: #F9F4EA;
       --ink: #173C3A;
       --clay: #C65B3A;
+      --sand: #D8BC8C;
+      --sand-tint: #EEE5D1;
       --ink-soft: rgba(23, 60, 58, 0.66);
       --rule: rgba(23, 60, 58, 0.24);
       --heading: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
@@ -51,38 +53,77 @@
     }
     .toolbar a { text-decoration: none; }
     .toolbar a:hover { text-decoration: underline; }
-    .toolbar button {
+    .toolbar .download {
+      display: inline-flex; align-items: center; text-decoration: none;
       font: 600 0.9rem var(--heading); color: var(--paper); background: var(--ink);
-      border: 1px solid var(--ink); padding: 0.55rem 0.95rem; min-height: 44px; cursor: pointer;
+      border: 1.5px solid var(--ink); border-radius: 999px; padding: 0.55rem 1.15rem; min-height: 44px; cursor: pointer;
+      box-shadow: 3px 3px 0 var(--sand); transition: transform .15s, box-shadow .15s, background .15s;
     }
-    .toolbar button:hover { background: var(--clay); border-color: var(--clay); }
+    .toolbar .download:hover { text-decoration: none; background: var(--clay); border-color: var(--clay); transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--sand); }
 
     .sheet {
-      max-width: 60rem; margin: 0 auto 3rem;
+      max-width: 60rem; margin: 0 auto 3.5rem;
       background: var(--sheet);
       border: 1.5px solid var(--ink);
+      box-shadow: 12px 12px 0 var(--sand);
       padding: clamp(1.4rem, 4vw, 3rem);
     }
 
+    /* Header: the site's court line, a ball dropping diagonally onto the rule */
     .head {
+      --drop: clamp(110px, 17%, 180px);
+      position: relative;
       display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1.6rem; align-items: center;
-      padding-bottom: 1.6rem; border-bottom: 1.5px solid var(--ink);
+      padding: 0 var(--drop) 1.6rem 0; border-bottom: 1.5px solid var(--ink);
     }
-    .head img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; display: block; border: 1.5px solid var(--ink); }
-    .head h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; letter-spacing: -0.03em; line-height: 0.95; }
-    .role { font: 500 1.15rem var(--heading); margin-top: 0.35rem; }
-    .contact { display: flex; flex-wrap: wrap; gap: 0.2rem 1.1rem; margin-top: 0.7rem; font: 0.78rem var(--mono); color: var(--ink-soft); }
+    .head img {
+      width: 124px; height: 124px; border-radius: 22px; object-fit: cover; display: block;
+      outline: 1.5px solid var(--ink); outline-offset: -1.5px; box-shadow: 6px 6px 0 var(--sand);
+    }
+    .head h1 { font-size: clamp(2rem, 5.4vw, 3.3rem); font-weight: 700; letter-spacing: -0.035em; line-height: 0.95; }
+    .role { font: 500 1.15rem var(--heading); margin-top: 0.4rem; }
+    .contact { display: flex; flex-wrap: wrap; gap: 0.2rem 1.1rem; margin-top: 0.75rem; font: 0.78rem var(--mono); color: var(--ink-soft); }
     .contact a { color: var(--ink); }
+    .head-line {
+      position: absolute; right: 0; top: 6px; bottom: -0.75px; width: calc(var(--drop) - 1.2rem);
+      pointer-events: none;
+    }
+    .head-line svg { display: block; width: 100%; height: 100%; overflow: visible; }
+    .head-line path { fill: none; stroke: var(--ink); stroke-width: 1.5; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+    .head-ball {
+      position: absolute; right: -8px; top: -2px; width: 16px; height: 16px; border-radius: 50%;
+      background: var(--clay); border: 1.5px solid var(--ink);
+    }
 
-    .summary { font-size: 1.02rem; max-width: 62ch; margin: 1.4rem 0 0; }
+    .summary { font-size: 1.04rem; max-width: 62ch; margin: 1.4rem 0 0; }
 
-    .cols { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr); gap: 2.4rem; margin-top: 1.8rem; }
+    .stats {
+      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 1.5rem;
+      border: 1.5px solid var(--ink); background: var(--sand-tint);
+    }
+    .stats li { padding: 0.8rem 1rem 0.85rem; display: flex; flex-direction: column; gap: 0.3rem; }
+    .stats li + li { border-left: 1.5px solid var(--ink); }
+    .stats b { font: 700 2.1rem/1 var(--heading); letter-spacing: -0.03em; }
+    .stats span { font: 0.72rem/1.35 var(--mono); color: var(--ink-soft); }
+
+    .cols { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr); gap: 2.6rem; margin-top: 2rem; }
 
     h2 {
-      font: 500 0.72rem var(--mono); letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-soft);
-      border-bottom: 1px solid var(--rule); padding-bottom: 0.35rem; margin-bottom: 0.9rem;
+      display: flex; align-items: center; gap: 0.75rem;
+      font: 600 1.25rem var(--heading); letter-spacing: -0.015em; margin-bottom: 0.95rem;
     }
-    section + section { margin-top: 1.7rem; }
+    h2::after { content: ""; flex: 1; height: 1.5px; background: var(--ink); }
+    section + section { margin-top: 1.9rem; }
+
+    /* Timeline: one ink line, a stop per role, the ball marks where I am now */
+    .timeline { position: relative; padding-left: 1.6rem; }
+    .timeline::before { content: ""; position: absolute; left: 5px; top: 0.6em; bottom: 0.9em; width: 1.5px; background: var(--ink); }
+    .timeline .entry { position: relative; }
+    .timeline .entry::before {
+      content: ""; position: absolute; left: calc(-1.6rem + 0.75px); top: 0.38em; width: 11px; height: 11px;
+      border-radius: 50%; background: var(--sheet); border: 1.5px solid var(--ink); box-sizing: border-box;
+    }
+    .timeline .entry.now::before { width: 14px; height: 14px; left: calc(-1.6rem - 0.75px); top: 0.3em; background: var(--clay); }
 
     .entry + .entry { margin-top: 1rem; }
     .entry-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 0 1rem; }
@@ -92,8 +133,13 @@
     .where { font: 0.74rem var(--mono); color: var(--ink-soft); margin-top: 0.1rem; }
     .entry p { margin-top: 0.3rem; }
     .entry .thesis { border-left: 2px solid var(--clay); padding-left: 0.7rem; margin-top: 0.5rem; }
-    .earlier { margin-top: 1rem; font-size: 0.88rem; color: var(--ink-soft); }
+    .earlier { margin-top: 1rem; padding-left: 1.6rem; font-size: 0.88rem; color: var(--ink-soft); }
 
+    .card {
+      background: var(--sand-tint); border: 1.5px solid var(--ink); box-shadow: 6px 6px 0 var(--sand);
+      padding: 1rem 1.15rem 1.15rem;
+    }
+    .card h2 { margin-bottom: 0.8rem; }
     .side .item + .item { margin-top: 0.75rem; }
     .side h3 { font-size: 0.98rem; font-weight: 600; }
     .side h3 a { text-decoration: none; }
@@ -102,38 +148,61 @@
     .side .meta { font: 0.7rem var(--mono); color: var(--ink-soft); }
 
     .tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
-    .tags li { font: 0.74rem var(--mono); border: 1px solid var(--rule); border-radius: 999px; padding: 0.15em 0.6em; }
+    .tags li { font: 0.74rem var(--mono); border: 1px solid var(--ink); border-radius: 999px; padding: 0.15em 0.6em; background: var(--sheet); }
     .tags + .label { margin-top: 0.8rem; }
     .label { font: 0.7rem var(--mono); color: var(--ink-soft); margin-bottom: 0.35rem; }
     .langs li { display: flex; justify-content: space-between; gap: 1rem; font-size: 0.88rem; }
     .langs li + li { margin-top: 0.2rem; }
     .langs span { font: 0.72rem var(--mono); color: var(--ink-soft); text-align: right; }
+    .main .langs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem 1.2rem; }
+    .main .langs li { flex-direction: column; justify-content: flex-start; gap: 0.1rem; font-size: 0.95rem; }
+    .main .langs li + li { margin-top: 0; }
+    .main .langs span { text-align: left; }
+    .side .entry-head { flex-direction: column; align-items: flex-start; }
 
     @media (max-width: 720px) {
-      .cols { grid-template-columns: minmax(0, 1fr); gap: 1.7rem; }
-      .head { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
-      .head img { width: 96px; height: 96px; }
-      .sheet { border-left: 0; border-right: 0; }
+      .cols { grid-template-columns: minmax(0, 1fr); gap: 1.9rem; }
+      .head { grid-template-columns: minmax(0, 1fr); gap: 1rem; padding-right: 0; }
+      .head img { width: 96px; height: 96px; border-radius: 18px; box-shadow: 4px 4px 0 var(--sand); }
+      .head-line, .head-ball { display: none; }
+      .sheet { border-left: 0; border-right: 0; box-shadow: none; }
+      .stats b { font-size: 1.6rem; }
+      .stats li { padding: 0.7rem 0.75rem; }
+    }
+    @media (max-width: 520px) {
+      .stats { grid-template-columns: minmax(0, 1fr); }
+      .stats li { flex-direction: row; align-items: center; gap: 0.9rem; }
+      .stats li + li { border-left: 0; border-top: 1.5px solid var(--ink); }
+      .stats b { min-width: 3.2ch; }
     }
 
     @page { size: A4; margin: 11mm 12mm; }
     @media print {
-      html { font-size: 8.3pt; }
+      html { font-size: 9.5pt; }
       body { background: #fff; font-size: 1rem; line-height: 1.33; }
       .toolbar { display: none; }
-      .sheet { max-width: none; margin: 0; padding: 0; border: 0; background: #fff; }
+      .sheet { max-width: none; margin: 0; padding: 0; border: 0; background: #fff; box-shadow: none; }
+      .timeline .entry::before { background: #fff; }
+      .timeline .entry.now::before { background: var(--clay); }
       .head { gap: 1.2rem; padding-bottom: 1rem; }
-      .head img { width: 88px; height: 88px; }
+      .head img { width: 84px; height: 84px; border-radius: 14px; box-shadow: 4px 4px 0 var(--sand); }
+      .stats { display: none; }
+      .head-line { right: 7px; }
+      .head-ball { right: 0; }
+      .stats li { padding: 0.45rem 0.8rem 0.5rem; gap: 0.15rem; }
+      .stats b { font-size: 16pt; }
+      .card { box-shadow: 4px 4px 0 var(--sand); padding: 0.7rem 0.85rem 0.8rem; }
+      h2 { font-size: 10.5pt; margin-bottom: 0.5rem; }
+      .tags li { background: #fff; }
       .head h1 { font-size: 24pt; }
       .role { font-size: 11pt; }
       .summary { font-size: 9pt; margin-top: 0.9rem; max-width: none; }
-      .cols { margin-top: 1rem; gap: 1.5rem; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+      .cols { margin-top: 1rem; gap: 1.5rem; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); }
       section + section { margin-top: 0.9rem; }
       .entry + .entry { margin-top: 0.5rem; }
       .entry p { margin-top: 0.15rem; }
       .earlier { margin-top: 0.6rem; }
       .entry h3 { font-size: 9.6pt; }
-      h2 { margin-bottom: 0.6rem; }
       a { text-decoration: none; }
       .entry, .item { break-inside: avoid; }
       * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -144,7 +213,7 @@
 
 <nav class="toolbar" aria-label="CV">
   <a href="./">← henrikhestnes.com</a>
-  <button type="button" onclick="window.print()">Save as PDF</button>
+  <a class="download" href="cv.pdf" download="Henrik-Larsson-Hestnes-CV.pdf">Download PDF</a>
 </nav>
 
 <main class="sheet">
@@ -161,16 +230,25 @@
         <a href="https://www.linkedin.com/in/henrikhestnes/">linkedin.com/in/henrikhestnes</a>
       </p>
     </div>
+    <span class="head-line" aria-hidden="true"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M 100 0 L 0 100"/></svg></span>
+    <span class="head-ball" aria-hidden="true"></span>
   </header>
 
-  <p class="summary">Norwegian software engineer at Solution Seeker since 2023, currently working from Rio de Janeiro. M.Sc. in Cybernetics and Robotics from NTNU (grade A), specialised in real-time systems, with a master's thesis in machine learning. Outside work I build small, dependency-free tools: hand-written CUDA kernels, native macOS utilities and an offline-first language-learning site.</p>
+  <p class="summary">Norwegian software engineer at Solution Seeker since 2023, currently working from Rio de Janeiro. M.Sc. in Cybernetics and Robotics from NTNU with an A average, specialised in real-time systems, with a master's thesis in machine learning. Outside work I build small, dependency-free tools: hand-written CUDA kernels, native macOS utilities and an offline-first language-learning site.</p>
+
+  <ul class="stats">
+    <li><b>1 of 5</b><span>Engineers who own all of Solution Seeker's back end and infrastructure</span></li>
+    <li><b>A</b><span>Average grade, M.Sc. Cybernetics and Robotics at NTNU</span></li>
+    <li><b>3.86</b><span>GPA out of 4.0, exchange year at UC San Diego</span></li>
+  </ul>
 
   <div class="cols">
     <div class="main">
       <section aria-labelledby="h-exp">
         <h2 id="h-exp">Experience</h2>
 
-        <article class="entry">
+        <div class="timeline">
+        <article class="entry now">
           <div class="entry-head"><h3>Software Engineer <span>· Solution Seeker</span></h3><span class="when">Aug 2023 – present</span></div>
           <p class="where">Oslo, Norway · Rio de Janeiro, Brazil since 2026</p>
           <p>One of five developers who own the company's entire back end and self-hosted infrastructure. I work mainly on the data pipelines and integrations that bring customer data in, the Kafka-based event-driven architecture, and data import and export, and I am the responsible engineer for several customers.</p>
@@ -205,18 +283,20 @@
           <p class="where">2nd Battalion, Skjold</p>
           <p>Responsible for radio communications in a four-soldier reconnaissance patrol.</p>
         </article>
+        </div>
 
         <p class="earlier">Earlier: part-time salesperson in the paint departments of MAXBO Hvam and Alna, 2016–2017 and 2020.</p>
       </section>
 
       <section aria-labelledby="h-edu">
         <h2 id="h-edu">Education</h2>
+        <div class="timeline">
 
         <article class="entry">
           <div class="entry-head"><h3>M.Sc. Cybernetics and Robotics <span>· NTNU</span></h3><span class="when">Aug 2018 – Jun 2023</span></div>
-          <p class="where">Trondheim, Norway · grade A</p>
+          <p class="where">Trondheim, Norway · A average</p>
           <p>Specialisation in real-time systems.</p>
-          <p class="thesis">Thesis: <em>Machine Learning-Enabled Predictive Modeling of Building Performance for Electricity Optimization</em>, supervised by Prof. Adil Rasheed.</p>
+          <p class="thesis">Thesis (grade A): <em>Machine Learning-Enabled Predictive Modeling of Building Performance for Electricity Optimization</em>, supervised by Prof. Adil Rasheed.</p>
         </article>
 
         <article class="entry">
@@ -224,31 +304,21 @@
           <p class="where">San Diego, United States · GPA 3.86 / 4.0</p>
           <p>Graduate coursework in cybernetics and robotics as an exchange student from NTNU, including GPU programming with CUDA.</p>
         </article>
+        </div>
+      </section>
+      <section aria-labelledby="h-lang">
+        <h2 id="h-lang">Languages</h2>
+        <ul class="langs">
+          <li>Norwegian <span>native</span></li>
+          <li>English <span>full professional</span></li>
+          <li>Portuguese <span>intermediate</span></li>
+        </ul>
       </section>
 
-      <section aria-labelledby="h-vol">
-        <h2 id="h-vol">Volunteering</h2>
-        <article class="entry">
-          <div class="entry-head"><h3>Leader <span>· Omega Kielderstyre</span></h3><span class="when">2018 – 2020</span></div>
-          <p>Led the 14 student volunteers running the licensed bar Kielderen and its social events, with personnel responsibility. Committee and board member before that.</p>
-        </article>
-        <article class="entry">
-          <div class="entry-head"><h3>Key Account Manager <span>· UKA-19</span></h3><span class="when">2019 – 2022</span></div>
-          <p>Owned the relationship and contract with Sit, one of the student festival's five main partners.</p>
-        </article>
-        <article class="entry">
-          <div class="entry-head"><h3>Business Relationship Manager <span>· Nettverksdagene</span></h3><span class="when">2020 – 2021</span></div>
-          <p>Recruited companies to the career fair and was their contact through planning and execution.</p>
-        </article>
-        <article class="entry">
-          <div class="entry-head"><h3>Football Coach <span>· Omega FK</span></h3><span class="when">2019</span></div>
-          <p>Ran the team's administration and finances, match management and tactics.</p>
-        </article>
-      </section>
     </div>
 
     <aside class="side">
-      <section aria-labelledby="h-proj">
+      <section class="card" aria-labelledby="h-proj">
         <h2 id="h-proj">Projects</h2>
         <div class="item">
           <h3><a href="https://falagringo.com">Fala Gringo</a></h3>
@@ -284,13 +354,26 @@
         </ul>
       </section>
 
-      <section aria-labelledby="h-lang">
-        <h2 id="h-lang">Languages</h2>
-        <ul class="langs">
-          <li>Norwegian <span>native</span></li>
-          <li>English <span>full professional</span></li>
-          <li>Portuguese <span>intermediate</span></li>
-        </ul>
+      <section aria-labelledby="h-vol">
+        <h2 id="h-vol">Volunteering</h2>
+        <div class="timeline">
+        <article class="entry">
+          <div class="entry-head"><h3>Key Account Manager <span>· UKA-19</span></h3><span class="when">2019 – 2022</span></div>
+          <p>Owned the relationship and contract with Sit, one of the student festival's five main partners.</p>
+        </article>
+        <article class="entry">
+          <div class="entry-head"><h3>Business Relationship Manager <span>· Nettverksdagene</span></h3><span class="when">2020 – 2021</span></div>
+          <p>Recruited companies to the career fair and was their contact through planning and execution.</p>
+        </article>
+        <article class="entry">
+          <div class="entry-head"><h3>Leader <span>· Omega Kielderstyre</span></h3><span class="when">2018 – 2020</span></div>
+          <p>Led the 14 student volunteers running the licensed bar Kielderen and its social events, with personnel responsibility. Committee and board member before that.</p>
+        </article>
+        <article class="entry">
+          <div class="entry-head"><h3>Football Coach <span>· Omega FK</span></h3><span class="when">2019</span></div>
+          <p>Ran the team's administration and finances, match management and tactics.</p>
+        </article>
+        </div>
       </section>
 
     </aside>
