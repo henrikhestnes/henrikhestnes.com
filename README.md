@@ -4,7 +4,7 @@ A personal homepage with three procedural sports illustrations and an original S
 
 ## Preview
 
-Production: https://henrikhestnes.com. Cloudflare Workers Static Assets serves the 15 public assets assembled by `build.mjs`; backend source and tests are excluded. The original https://henrik-larsson-hestnes.pages.dev deployment is retained as a fallback during migration. The shared guestbook is connected and accepting postcards; new notes await owner approval. See the backend README for verification details.
+Production: https://henrikhestnes.com. Cloudflare Workers Static Assets serves the 14 public assets assembled by `build.mjs`; backend source and tests are excluded. The original https://henrik-larsson-hestnes.pages.dev deployment is retained as a fallback during migration. The shared guestbook is connected and accepting postcards; new notes await owner approval. See the backend README for verification details.
 
 Open `index.html` in a browser, or serve the directory with a static HTTP server. The classic bootstrap imports pinned Three.js 0.180.0 from cdnjs. Internet is required for live 3D; the local poster, text, font and winter print remain available without it.
 
