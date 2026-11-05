@@ -93,6 +93,7 @@ em { font-style: italic; }
 .hero-links a:hover { border-color: var(--clay); }
 .hero-links span { display: inline-block; transition: transform 0.2s; }
 .hero-links a:hover span { transform: translateY(2px); }
+.hero-links a[href="cv.html"]:hover span { transform: translateX(3px); }
 
 .hero-art { position: relative; min-width: 0; }
 
@@ -363,7 +364,7 @@ button:disabled { opacity:.55; cursor:default; }
   aspect-ratio: 2 / 3;
   object-fit: cover;
   border-radius: 26px;
-  margin: 0 auto 1.6rem;
+  margin: 0 0 1.6rem;
   box-shadow: 8px 8px 0 var(--sand);
   outline: 1.5px solid var(--ink);
   outline-offset: -1.5px;
