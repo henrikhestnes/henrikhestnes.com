@@ -4,7 +4,7 @@ A personal homepage with three procedural sports illustrations and an original S
 
 ## Preview
 
-Production: https://henrikhestnes.com. Cloudflare Workers Static Assets serves the 14 public assets assembled by `build.mjs`; backend source and tests are excluded. The original https://henrik-larsson-hestnes.pages.dev deployment is retained as a fallback during migration. The shared guestbook is connected and accepting postcards; new notes await owner approval. See the backend README for verification details.
+Production: https://henrikhestnes.com. Cloudflare Workers Static Assets serves the 21 public assets assembled by `build.mjs`; backend source and tests are excluded. The original https://henrik-larsson-hestnes.pages.dev deployment is retained as a fallback during migration. The shared guestbook is connected and accepting postcards; new notes await owner approval. See the backend README for verification details.
 
 Open `index.html` in a browser, or serve the directory with a static HTTP server. The classic bootstrap imports pinned Three.js 0.180.0 from cdnjs. Internet is required for live 3D; the local poster, text, font and winter print remain available without it.
 
@@ -26,6 +26,9 @@ Ball radii remain the same at rest and in motion: 0.20 scene units for futevôle
 - `shark-motion.js`: deterministic motion sampling, roster definitions and short sequence durations.
 - `index.html` / `style.css`: content and responsive presentation. The full name appears in the hero, document title and metadata.
 - `poster.jpg`: a 1200 × 840 still of the current futevôlei scene.
+- `cv.html`: printable one-page CV (served at `/cv`). "Save as PDF" uses the browser print dialog; print styles keep it to one A4 page.
+- `photo-full.jpg`, `photo.jpg`: the portrait photo: the full 900 × 1350 picture above the name in the hero, and a 640 px square head-and-shoulders crop for the CV.
+- `away-*.jpg`: four 800 × 1000 photos pinned up as postcards in "Away from the keyboard". Originals live in `pics/` (git-ignored); exports are re-encoded with no EXIF, so no GPS or camera data is published.
 - `og.jpg`: the 1200 × 630 link-preview card (Messenger, WhatsApp, Slack, X): the cartoon portrait, name and tagline on paper. Regenerate by screenshotting `tools/og-card.html` at 1200 × 630, then bump the `?v=` on its URLs in `index.html`: Facebook caches images by URL.
 - `favicon.png`, `apple-touch-icon.png`: the cartoon portrait on an ink tile (32 px rounded, 180 px square for iOS). `tools/portrait.png` is a 512 px transparent bust of the same drawing, used by the OG card.
 - `snow-print.svg`: original winter illustration with the burgundy-and-white ball.

@@ -352,3 +352,52 @@ button:disabled { opacity:.55; cursor:default; }
 .art-hint { margin: 0.7rem var(--gutter) 0 0; text-align: right; font: 0.72rem var(--mono); letter-spacing: 0.03em; color: var(--ink-soft); }
 .art.no-webgl ~ .art-hint { display: none; }
 @media (max-width: 860px) { .art-hint { margin-right: 0; text-align: left; } }
+
+/* The real photo sits centred above the name; the cartoon stays in the favicon and link card.
+   The wrapper shrinks to the widest line of the name so "centred" means over the name. */
+.hero-id { width: fit-content; max-width: 100%; }
+.hero-photo {
+  display: block;
+  width: clamp(184px, 17vw, 248px);
+  height: auto;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 26px;
+  margin: 0 auto 1.6rem;
+  box-shadow: 8px 8px 0 var(--sand);
+  outline: 1.5px solid var(--ink);
+  outline-offset: -1.5px;
+}
+
+
+/* Away from the keyboard: four photos pinned up like postcards, each a little askew. */
+.away-photos {
+  list-style: none; padding: 0; margin-top: clamp(2rem, 4vw, 3.5rem);
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(1rem, 2.4vw, 2rem);
+}
+.away-photos figure {
+  margin: 0;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  padding: 0.55rem 0.55rem 0.45rem;
+  box-shadow: 5px 6px 0 rgba(23, 60, 58, 0.06);
+  transform: rotate(var(--tilt, 0deg));
+  transition: transform 0.2s;
+}
+.away-photos li:nth-child(1) { --tilt: -1.6deg; }
+.away-photos li:nth-child(2) { --tilt: 1.2deg; }
+.away-photos li:nth-child(3) { --tilt: -0.8deg; }
+.away-photos li:nth-child(4) { --tilt: 1.8deg; }
+.away-photos figure:hover { transform: rotate(0deg) translateY(-3px); }
+.away-photos img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; }
+.away-photos figcaption { font: 0.72rem/1.4 var(--mono); color: var(--ink-soft); margin-top: 0.5rem; }
+@media (max-width: 860px) { .away-photos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (prefers-reduced-motion: reduce) { .away-photos figure { transition: none; } }
+
+/* Desktop: the hero text sits just above the closing rule. The sculpture keeps
+   its own clearance through a margin, so the rule stays clear of the court. */
+@media (min-width: 861px) {
+  .hero { padding-bottom: 2.75rem; }
+  .hero-text { padding-bottom: 0; align-self: end; }
+  .hero-art { margin-bottom: clamp(96px, 9vw, 150px); }
+}

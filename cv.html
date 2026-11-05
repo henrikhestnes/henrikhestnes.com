@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CV · Henrik Larsson Hestnes</title>
+  <meta name="description" content="CV of Henrik Larsson Hestnes, software engineer at Solution Seeker with an M.Sc. in Cybernetics and Robotics from NTNU.">
+  <link rel="canonical" href="https://henrikhestnes.com/cv">
+  <meta name="theme-color" content="#F2EBDD">
+  <link rel="icon" href="favicon.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="preload" href="fonts/BricolageGrotesque.woff2" as="font" type="font/woff2" crossorigin>
+  <style>
+    @font-face {
+      font-family: "Bricolage Grotesque";
+      src: url("fonts/BricolageGrotesque.woff2") format("woff2");
+      font-weight: 200 800;
+      font-display: swap;
+    }
+    :root {
+      --paper: #F2EBDD;
+      --sheet: #F9F4EA;
+      --ink: #173C3A;
+      --clay: #C65B3A;
+      --ink-soft: rgba(23, 60, 58, 0.66);
+      --rule: rgba(23, 60, 58, 0.24);
+      --heading: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+      --body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      color-scheme: light;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font: 0.95rem/1.5 var(--body);
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
+    a:hover { text-decoration-color: var(--clay); }
+    a:focus-visible, button:focus-visible { outline: 2px solid var(--clay); outline-offset: 3px; }
+    h1, h2, h3 { font-family: var(--heading); margin: 0; letter-spacing: -0.01em; }
+    p { margin: 0; }
+    ul { margin: 0; padding: 0; list-style: none; }
+
+    .toolbar {
+      max-width: 60rem; margin: 0 auto; padding: 1.2rem 16px 0.8rem;
+      display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+      font: 0.8rem var(--mono);
+    }
+    .toolbar a { text-decoration: none; }
+    .toolbar a:hover { text-decoration: underline; }
+    .toolbar button {
+      font: 600 0.9rem var(--heading); color: var(--paper); background: var(--ink);
+      border: 1px solid var(--ink); padding: 0.55rem 0.95rem; min-height: 44px; cursor: pointer;
+    }
+    .toolbar button:hover { background: var(--clay); border-color: var(--clay); }
+
+    .sheet {
+      max-width: 60rem; margin: 0 auto 3rem;
+      background: var(--sheet);
+      border: 1.5px solid var(--ink);
+      padding: clamp(1.4rem, 4vw, 3rem);
+    }
+
+    .head {
+      display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1.6rem; align-items: center;
+      padding-bottom: 1.6rem; border-bottom: 1.5px solid var(--ink);
+    }
+    .head img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; display: block; border: 1.5px solid var(--ink); }
+    .head h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; letter-spacing: -0.03em; line-height: 0.95; }
+    .role { font: 500 1.15rem var(--heading); margin-top: 0.35rem; }
+    .contact { display: flex; flex-wrap: wrap; gap: 0.2rem 1.1rem; margin-top: 0.7rem; font: 0.78rem var(--mono); color: var(--ink-soft); }
+    .contact a { color: var(--ink); }
+
+    .summary { font-size: 1.02rem; max-width: 62ch; margin: 1.4rem 0 0; }
+
+    .cols { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr); gap: 2.4rem; margin-top: 1.8rem; }
+
+    h2 {
+      font: 500 0.72rem var(--mono); letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-soft);
+      border-bottom: 1px solid var(--rule); padding-bottom: 0.35rem; margin-bottom: 0.9rem;
+    }
+    section + section { margin-top: 1.7rem; }
+
+    .entry + .entry { margin-top: 1rem; }
+    .entry-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 0 1rem; }
+    .entry h3 { font-size: 1.08rem; font-weight: 600; }
+    .entry h3 span { font-weight: 400; }
+    .when { font: 0.74rem var(--mono); color: var(--ink-soft); white-space: nowrap; }
+    .where { font: 0.74rem var(--mono); color: var(--ink-soft); margin-top: 0.1rem; }
+    .entry p { margin-top: 0.3rem; }
+    .entry .thesis { border-left: 2px solid var(--clay); padding-left: 0.7rem; margin-top: 0.5rem; }
+    .earlier { margin-top: 1rem; font-size: 0.88rem; color: var(--ink-soft); }
+
+    .side .item + .item { margin-top: 0.75rem; }
+    .side h3 { font-size: 0.98rem; font-weight: 600; }
+    .side h3 a { text-decoration: none; }
+    .side h3 a:hover { text-decoration: underline; }
+    .side p { font-size: 0.86rem; margin-top: 0.1rem; }
+    .side .meta { font: 0.7rem var(--mono); color: var(--ink-soft); }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .tags li { font: 0.74rem var(--mono); border: 1px solid var(--rule); border-radius: 999px; padding: 0.15em 0.6em; }
+    .tags + .label { margin-top: 0.8rem; }
+    .label { font: 0.7rem var(--mono); color: var(--ink-soft); margin-bottom: 0.35rem; }
+    .langs li { display: flex; justify-content: space-between; gap: 1rem; font-size: 0.88rem; }
+    .langs li + li { margin-top: 0.2rem; }
+    .langs span { font: 0.72rem var(--mono); color: var(--ink-soft); text-align: right; }
+
+    @media (max-width: 720px) {
+      .cols { grid-template-columns: minmax(0, 1fr); gap: 1.7rem; }
+      .head { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+      .head img { width: 96px; height: 96px; }
+      .sheet { border-left: 0; border-right: 0; }
+    }
+
+    @page { size: A4; margin: 11mm 12mm; }
+    @media print {
+      html { font-size: 8.3pt; }
+      body { background: #fff; font-size: 1rem; line-height: 1.33; }
+      .toolbar { display: none; }
+      .sheet { max-width: none; margin: 0; padding: 0; border: 0; background: #fff; }
+      .head { gap: 1.2rem; padding-bottom: 1rem; }
+      .head img { width: 88px; height: 88px; }
+      .head h1 { font-size: 24pt; }
+      .role { font-size: 11pt; }
+      .summary { font-size: 9pt; margin-top: 0.9rem; max-width: none; }
+      .cols { margin-top: 1rem; gap: 1.5rem; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+      section + section { margin-top: 0.9rem; }
+      .entry + .entry { margin-top: 0.5rem; }
+      .entry p { margin-top: 0.15rem; }
+      .earlier { margin-top: 0.6rem; }
+      .entry h3 { font-size: 9.6pt; }
+      h2 { margin-bottom: 0.6rem; }
+      a { text-decoration: none; }
+      .entry, .item { break-inside: avoid; }
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="toolbar" aria-label="CV">
+  <a href="./">← henrikhestnes.com</a>
+  <button type="button" onclick="window.print()">Save as PDF</button>
+</nav>
+
+<main class="sheet">
+  <header class="head">
+    <img src="photo.jpg" width="640" height="640" alt="Henrik Larsson Hestnes, smiling, in a burgundy polo shirt.">
+    <div>
+      <h1>Henrik Larsson Hestnes</h1>
+      <p class="role">Software Engineer · M.Sc. Cybernetics &amp; Robotics</p>
+      <p class="contact">
+        <span>Rio de Janeiro, Brazil</span>
+        <a href="mailto:henrik@henrikhestnes.com">henrik@henrikhestnes.com</a>
+        <a href="https://henrikhestnes.com">henrikhestnes.com</a>
+        <a href="https://github.com/henrikhestnes">github.com/henrikhestnes</a>
+        <a href="https://www.linkedin.com/in/henrikhestnes/">linkedin.com/in/henrikhestnes</a>
+      </p>
+    </div>
+  </header>
+
+  <p class="summary">Norwegian software engineer at Solution Seeker since 2023, currently working from Rio de Janeiro. M.Sc. in Cybernetics and Robotics from NTNU (grade A), specialised in real-time systems, with a master's thesis in machine learning. Outside work I build small, dependency-free tools: hand-written CUDA kernels, native macOS utilities and an offline-first language-learning site.</p>
+
+  <div class="cols">
+    <div class="main">
+      <section aria-labelledby="h-exp">
+        <h2 id="h-exp">Experience</h2>
+
+        <article class="entry">
+          <div class="entry-head"><h3>Software Engineer <span>· Solution Seeker</span></h3><span class="when">Aug 2023 – present</span></div>
+          <p class="where">Oslo, Norway · Rio de Janeiro, Brazil since 2026</p>
+          <p>One of five developers who own the company's entire back end and self-hosted infrastructure. I work mainly on the data pipelines and integrations that bring customer data in, the Kafka-based event-driven architecture, and data import and export, and I am the responsible engineer for several customers.</p>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><h3>Research Assistant <span>· NTNU</span></h3><span class="when">Jan 2023 – Jun 2023</span></div>
+          <p class="where">Trondheim, Norway · part-time</p>
+          <p>Research assistant in TDT4127 Programming and Numerics.</p>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><h3>Teaching Assistant <span>· NTNU</span></h3><span class="when">2020 – 2022</span></div>
+          <p class="where">Trondheim, Norway · part-time, four semesters</p>
+          <p>Taught programming to first-year students: TDT4102 Procedural and Object-Oriented Programming (C++) twice, and TDT4110 Introduction to Information Technology (Python) twice.</p>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><h3>Summer Intern <span>· Accenture</span></h3><span class="when">Jun 2022 – Aug 2022</span></div>
+          <p class="where">Oslo, Norway</p>
+          <p>Full-stack Java developer in a cross-functional team building an indoor-navigation app with augmented reality on Android.</p>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><h3>Summer Intern <span>· Cisco</span></h3><span class="when">Jun 2021 – Aug 2021</span></div>
+          <p class="where">Oslo, Norway</p>
+          <p>Back-end C++ developer on a framework that collects metrics from separate parts of an embedded system and presents them in real time.</p>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><h3>Reconnaissance Soldier <span>· Norwegian Armed Forces</span></h3><span class="when">Aug 2017 – Jul 2018</span></div>
+          <p class="where">2nd Battalion, Skjold</p>
+          <p>Responsible for radio communications in a four-soldier reconnaissance patrol.</p>
+        </article>
+
+        <p class="earlier">Earlier: part-time salesperson in the paint departments of MAXBO Hvam and Alna, 2016–2017 and 2020.</p>
+      </section>
+
+      <section aria-labelledby="h-edu">
+        <h2 id="h-edu">Education</h2>
+
+        <article class="entry">
+          <div class="entry-head"><h3>M.Sc. Cybernetics and Robotics <span>· NTNU</span></h3><span class="when">Aug 2018 – Jun 2023</span></div>
+          <p class="where">Trondheim, Norway · grade A</p>
+          <p>Specialisation in real-time systems.</p>
+          <p class="thesis">Thesis: <em>Machine Learning-Enabled Predictive Modeling of Building Performance for Electricity Optimization</em>, supervised by Prof. Adil Rasheed.</p>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head"><h3>Exchange year <span>· UC San Diego</span></h3><span class="when">Sep 2021 – Jun 2022</span></div>
+          <p class="where">San Diego, United States · GPA 3.86 / 4.0</p>
+          <p>Graduate coursework in cybernetics and robotics as an exchange student from NTNU, including GPU programming with CUDA.</p>
+        </article>
+      </section>
+
+      <section aria-labelledby="h-vol">
+        <h2 id="h-vol">Volunteering</h2>
+        <article class="entry">
+          <div class="entry-head"><h3>Leader <span>· Omega Kielderstyre</span></h3><span class="when">2018 – 2020</span></div>
+          <p>Led the 14 student volunteers running the licensed bar Kielderen and its social events, with personnel responsibility. Committee and board member before that.</p>
+        </article>
+        <article class="entry">
+          <div class="entry-head"><h3>Key Account Manager <span>· UKA-19</span></h3><span class="when">2019 – 2022</span></div>
+          <p>Owned the relationship and contract with Sit, one of the student festival's five main partners.</p>
+        </article>
+        <article class="entry">
+          <div class="entry-head"><h3>Business Relationship Manager <span>· Nettverksdagene</span></h3><span class="when">2020 – 2021</span></div>
+          <p>Recruited companies to the career fair and was their contact through planning and execution.</p>
+        </article>
+        <article class="entry">
+          <div class="entry-head"><h3>Football Coach <span>· Omega FK</span></h3><span class="when">2019</span></div>
+          <p>Ran the team's administration and finances, match management and tactics.</p>
+        </article>
+      </section>
+    </div>
+
+    <aside class="side">
+      <section aria-labelledby="h-proj">
+        <h2 id="h-proj">Projects</h2>
+        <div class="item">
+          <h3><a href="https://falagringo.com">Fala Gringo</a></h3>
+          <p class="meta">HTML · JS · PWA</p>
+          <p>Free, offline-first drills for spoken Brazilian Portuguese, with sister sites for English and Norwegian.</p>
+        </div>
+        <div class="item">
+          <h3><a href="https://github.com/henrikhestnes/CUDA-Pybind11-matrix-multiplication">CUDA matrix multiplication</a></h3>
+          <p class="meta">CUDA · C++ · Pybind11</p>
+          <p>Hand-written naive and shared-memory tiled kernels, called from Python and benchmarked against NumPy.</p>
+        </div>
+        <div class="item">
+          <h3><a href="https://github.com/henrikhestnes/Autotennis">Autotennis</a></h3>
+          <p class="meta">Python</p>
+          <p>A service that books tennis and padel sessions at the university club.</p>
+        </div>
+        <div class="item">
+          <h3>macOS tools</h3>
+          <p class="meta">Swift · AppKit</p>
+          <p><a href="https://github.com/henrikhestnes/MacMiddleClick">MacMiddleClick</a>, <a href="https://github.com/henrikhestnes/MacMural">MacMural</a> and <a href="https://github.com/henrikhestnes/MacSnip">MacSnip</a>: dependency-free menu bar apps. Contributor to the <a href="https://omniwm.app">OmniWM</a> tiling window manager.</p>
+        </div>
+      </section>
+
+      <section aria-labelledby="h-skills">
+        <h2 id="h-skills">Skills</h2>
+        <p class="label">Languages</p>
+        <ul class="tags">
+          <li>Python</li><li>C++</li><li>C</li><li>CUDA</li><li>Java</li><li>Swift</li><li>JavaScript</li><li>Elixir</li>
+        </ul>
+        <p class="label">Tools</p>
+        <ul class="tags">
+          <li>Kafka</li><li>Git</li><li>Linux</li><li>gRPC</li><li>Pybind11</li><li>Android</li><li>Cloudflare Workers</li><li>Terraform</li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="h-lang">
+        <h2 id="h-lang">Languages</h2>
+        <ul class="langs">
+          <li>Norwegian <span>native</span></li>
+          <li>English <span>full professional</span></li>
+          <li>Portuguese <span>intermediate</span></li>
+        </ul>
+      </section>
+
+    </aside>
+  </div>
+</main>
+
+</body>
+</html>

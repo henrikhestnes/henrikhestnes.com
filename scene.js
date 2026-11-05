@@ -663,8 +663,49 @@ function drawLine() {
  const distance=(ruleY-B.y)/dy,elbowX=B.x+dx*distance;
  const f=n=>n.toFixed(2);
  lineSvg.setAttribute('viewBox',`0 0 ${hero.clientWidth} ${hero.clientHeight}`);
- lineSvg.innerHTML=`<path d="M ${f(B.x)} ${f(B.y)} L ${f(elbowX)} ${f(ruleY)} M 0 ${f(ruleY)} H ${hero.clientWidth}"/>`;
+ lineSvg.innerHTML=`<path d="M ${f(B.x)} ${f(B.y)}${sidestepText(B,{x:elbowX,y:ruleY},ruleY,f)} M 0 ${f(ruleY)} H ${hero.clientWidth}"/>`;
  lineSvg.classList.remove('hidden');hero.classList.remove('no-line');
+}
+
+// The diagonal from P heads for Q on the bottom rule. If it would cross the hero
+// photo or text, it does not barge through: just before the words it makes a
+// polite sidestep away from them (towards the rule, where there is never text)
+// and carries on parallel to its old course until it reaches the rule.
+// Returns the path after P, ending on the rule.
+function sidestepText(P,Q,ruleY,f){
+ const L=Math.hypot(Q.x-P.x,Q.y-P.y);
+ const straight=` L ${f(Q.x)} ${f(Q.y)}`;
+ if(!L)return straight;
+ const u={x:(Q.x-P.x)/L,y:(Q.y-P.y)/L},n={x:-u.y,y:u.x};   // u along the line, n across it
+ const away=n.y>0?1:-1;                                    // the side of n that faces down, away from the text
+ const hr=hero.getBoundingClientRect(),pad=14,rects=[];
+ const photo=hero.querySelector('.hero-photo');if(photo)rects.push(photo.getBoundingClientRect());
+ const range=document.createRange();
+ hero.querySelectorAll('.name,.tagline,.intro,.hero-links').forEach(el=>{range.selectNodeContents(el);rects.push(...range.getClientRects());});
+ const boxes=[];
+ for(const r of rects){
+  if(!r.width||!r.height)continue;
+  let a=Infinity,smin=Infinity,smax=-Infinity,b=-Infinity;
+  for(const x of [r.left-hr.left-pad,r.right-hr.left+pad])for(const y of [r.top-hr.top-pad,r.bottom-hr.top+pad]){
+   const px=x-P.x,py=y-P.y,t=px*u.x+py*u.y,s=(px*n.x+py*n.y)*away;
+   a=Math.min(a,t);b=Math.max(b,t);smin=Math.min(smin,s);smax=Math.max(smax,s);
+  }
+  boxes.push({a,b,smin,smax});
+ }
+ let t0=Infinity,clear=0;
+ for(const o of boxes)if(o.smin<0&&o.smax>0&&o.b>0&&o.a<L){t0=Math.min(t0,o.a);clear=Math.max(clear,o.smax);}
+ if(t0===Infinity)return straight;
+ // Stepping aside can walk the line into words further down; keep stepping until the new course is clear.
+ for(let changed=true,i=0;changed&&i<8;i++){
+  changed=false;
+  for(const o of boxes)if(o.b>t0&&o.smin<clear+4&&o.smax>clear+4){clear=o.smax;changed=true;}
+ }
+ const h=(clear+4)*away,r=Math.max(40,clear*1.6),k=r*.55;
+ const ts=Math.max(0,t0-r);
+ const p=(t,s)=>`${f(P.x+u.x*t+n.x*s)} ${f(P.y+u.y*t+n.y*s)}`;
+ const tEnd=(ruleY-P.y-n.y*h)/u.y;                        // where the shifted course meets the rule
+ if(tEnd<=t0)return straight;
+ return ` L ${p(ts,0)} C ${p(ts+k,0)} ${p(t0-k,h)} ${p(t0,h)} L ${p(tEnd,h)}`;
 }
 
 // ---------- Render on demand ----------
