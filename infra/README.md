@@ -4,7 +4,7 @@ Terraform for the parts of the `henrikhestnes.com` account that were set up by h
 
 | Managed here (Terraform) | Managed by Wrangler | Still manual |
 |---|---|---|
-| Email Routing (enable, DNS records, destination address) | Homepage Worker + custom domains (`../wrangler.jsonc`) | Clicking the destination-address verification link |
+| Email Routing (enable, DNS records, destination address, hello@ and henrik@ forwarding rules) | Homepage Worker + custom domains (`../wrangler.jsonc`) | Clicking the destination-address verification link |
 | WWW → apex redirect ruleset | Postcards Worker, D1 binding, vars, `send_email` binding (`../postcards-worker/wrangler.jsonc`) | `ADMIN_PASSWORD` secret (`wrangler secret put`) |
 | D1 database `henrik-postcards` (existence only; schema via migrations) | D1 migrations (`npm run db:migrate`) | Workers Builds git integration (not in the provider) |
 

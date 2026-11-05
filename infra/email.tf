@@ -24,3 +24,27 @@ resource "cloudflare_email_routing_address" "notify" {
   account_id = var.account_id
   email      = var.notify_email
 }
+
+# hello@ is the address on the website, henrik@ the one on the CV. Separate
+# rules so either can be switched off if it attracts spam. Cloudflare only
+# receives and forwards; replies still go out from the personal inbox.
+resource "cloudflare_email_routing_rule" "forward" {
+  for_each = toset(["hello", "henrik"])
+
+  zone_id = local.zone_id
+  name    = "${each.key}@ to personal inbox"
+  enabled = true
+
+  matchers = [{
+    type  = "literal"
+    field = "to"
+    value = "${each.key}@${var.zone_name}"
+  }]
+
+  actions = [{
+    type  = "forward"
+    value = [cloudflare_email_routing_address.notify.email]
+  }]
+
+  depends_on = [cloudflare_email_routing_dns.site]
+}
