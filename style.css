@@ -110,6 +110,8 @@ em { font-style: italic; }
 .poster { object-fit: cover; object-position: center; display: block; transition: opacity 0.4s; }
 .art.is-live .poster { opacity: 0; pointer-events: none; }
 canvas#court { display: block; touch-action: pan-y; cursor: pointer; }
+.art { -webkit-user-select: none; user-select: none; }
+.art[data-turning] canvas { cursor: grabbing; }
 .art.no-webgl canvas { display: none; }
 
 .art-controls {

@@ -59,12 +59,40 @@ const EL = THREE.MathUtils.degToRad(34);
 const VIEW_H = 18;                           // world units visible vertically
 const target = new THREE.Vector3(0, -0.35, 0);
 const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 200);
-camera.position.set(
-  target.x + 80 * Math.sin(AZ) * Math.cos(EL),
-  target.y + 80 * Math.sin(EL),
-  target.z + 80 * Math.cos(AZ) * Math.cos(EL),
-);
-camera.lookAt(target);
+// The resting view is the composition. Three motions borrow from it: a horizontal drag
+// spins the court (yaw), the mouse leans the camera (az sideways, lift up and down), and
+// scrolling the hero away lifts the camera until it looks straight down (scroll, 0 → 1).
+// Whenever a motion would push the slab out of frame, fitCamera zooms out just enough.
+const TILT_AZ = THREE.MathUtils.degToRad(15);
+// Lift runs from -1 to 1. At 0 the camera is at its resting 34°; at -1 it is level with the
+// slab, seeing it edge-on; at 1 it looks straight down (just shy of 90°, where lookAt has
+// no "up") and the court is turned so its length lies across the frame. Seen from above, an
+// orthographic slab has no sides and the figures shrink to their footprints, leaving the
+// painted lines: a court diagram in the page's ink. The turn is the short way round (56°)
+// and is done by lift 0.4: turning while the camera is still low would stand the court's
+// length up the frame and force a large zoom-out.
+const FLAT_EL = THREE.MathUtils.degToRad(89.5), FLAT_TURN = 0.4;
+const FLAT_YAW = AZ + Math.PI / 2;            // the court's length along screen x when looking down
+// Scrolling flattens fully once 70% of the artwork has gone, so there is a moment to see it.
+const FLAT_AT = 0.7;
+const view = { yaw: 0, yawVel: 0, drag: null, az: 0, lift: 0, azTo: 0, liftTo: 0, scroll: 0, scrollTo: 0, last: null, active: false };
+// Scroll lifts first; the mouse moves within whatever range it leaves.
+function lift() { const s = THREE.MathUtils.smoothstep(view.scroll, 0, FLAT_AT); return s + (1 - s) * view.lift; }
+const courtYaw = () => view.yaw + THREE.MathUtils.smoothstep(lift(), 0, FLAT_TURN) * FLAT_YAW;
+// The sideways lean fades out as the court flattens, so the plan holds still.
+function placeCamera(
+  az = AZ + view.az * (1 - Math.max(0, lift())),
+  el = lift() >= 0 ? THREE.MathUtils.lerp(EL, FLAT_EL, lift()) : EL * (1 + lift()),
+) {
+  camera.position.set(
+    target.x + 80 * Math.sin(az) * Math.cos(el),
+    target.y + 80 * Math.sin(el),
+    target.z + 80 * Math.cos(az) * Math.cos(el),
+  );
+  camera.lookAt(target);
+  camera.updateMatrixWorld();
+}
+placeCamera();
 
 // ---------- Materials & procedural textures ----------
 function noiseTexture(size, base, spread) {
@@ -574,6 +602,12 @@ const teams=Object.fromEntries(Object.entries(motion.ROSTERS).map(([name,roster]
  entry.scorer?0xD9A47C:[0xB87550,0x734B37,0xD9A47C,0x925F43][i%4],name!=='futevolei',name==='tennis',entry.scorer,
  name==='football'?(entry.team===0?PAL.paper:0x224D93):PAL.ink,name==='football'?(entry.team===0?0xA53A43:PAL.paper):null
 ))]));
+// ---------- Turntable: the court turns under a fixed sun ----------
+// Everything on the miniature rides one group pivoting at the centre of the court.
+// The ground shadow, sea and lights stay put, so shadows sweep over the surface as it turns.
+const turntable = new THREE.Group();
+for (const o of [...scene.children]) if (!o.isLight && o !== key.target && o !== catcher && o !== sea) turntable.add(o);
+scene.add(turntable);
 function poseTeam(name,poses){teams[name].forEach((player,i)=>player.pose(poses[i]));}
 function paintPoint(progress){
  const sample=motion.sampleGame(sport,progress);
@@ -629,12 +663,12 @@ function resize() {
   const narrow = hero.clientWidth <= 860;
   const restingView = narrow ? 16.8 / aspect : Math.max(VIEW_H, 23 / aspect);
   const viewH=restingView;
-  const look=target;
-  camera.position.set(look.x+80*Math.sin(AZ)*Math.cos(EL),look.y+80*Math.sin(EL),look.z+80*Math.cos(AZ)*Math.cos(EL));
-  camera.lookAt(look);
   camera.left = -viewH * aspect / 2; camera.right = viewH * aspect / 2;
   camera.top = viewH / 2; camera.bottom = -viewH / 2;
   camera.updateProjectionMatrix();
+  measureRest();
+  turntable.rotation.y = courtYaw();
+  placeCamera(); fitCamera();
   drawLine();
   // Resizing the canvas wipes it. ResizeObserver runs after this frame's rAF, so a
   // queued render would land a frame late and the blank canvas would flash. Draw now.
@@ -644,29 +678,106 @@ function resize() {
 
 // Project a world point into page coordinates relative to the hero section.
 const _v = new THREE.Vector3();
-function toHero(x, y, z) {
-  _v.set(x, y, z).project(camera);
+// Returns a projector that reads the layout once, since the line projects many points per frame.
+function heroProjector() {
   const r = art.getBoundingClientRect(), hr = hero.getBoundingClientRect();
-  return { x: r.left - hr.left + ((_v.x + 1) / 2) * r.width, y: r.top - hr.top + ((1 - _v.y) / 2) * r.height };
+  return (p) => {
+    _v.copy(p).project(camera);
+    return { x: r.left - hr.left + ((_v.x + 1) / 2) * r.width, y: r.top - hr.top + ((1 - _v.y) / 2) * r.height };
+  };
+}
+const SLAB_CORNERS = [];
+for (const x of [-SLAB_W / 2, SLAB_W / 2]) for (const z of [-SLAB_L / 2, SLAB_L / 2]) for (const y of [0, -SLAB_T]) SLAB_CORNERS.push(new THREE.Vector3(x, y, z));
+
+// ---------- Keep the slab in frame ----------
+// Spinning and leaning can carry the slab's ends past the frame; the camera then zooms
+// out just enough, and back in as the court returns. It is a continuous function of the
+// view, so it reads as the court easing away rather than a jump.
+const _c = new THREE.Vector3(), _turn = new THREE.Matrix4();
+let fitLimit = { x: Infinity, y: Infinity };
+function slabExtent(yaw) {   // furthest corner, as a fraction of the half-frame at zoom 1
+  _turn.makeRotationY(yaw);
+  let x = 0, y = 0;
+  for (const c of SLAB_CORNERS) {
+    _c.copy(c).applyMatrix4(_turn).applyMatrix4(camera.matrixWorldInverse);
+    x = Math.max(x, Math.abs(_c.x)); y = Math.max(y, Math.abs(_c.y));
+  }
+  return { x: x / camera.right, y: y / camera.top };
+}
+// The resting frame sets the allowance. An edge the composition already crops (phones)
+// may stay cropped; otherwise the slab keeps a small margin inside the frame.
+function measureRest() {
+  placeCamera(AZ, EL);
+  const r = slabExtent(0);
+  fitLimit = { x: r.x > 1 ? Infinity : Math.max(r.x, .96), y: r.y > 1 ? Infinity : Math.max(r.y, .96) };
+}
+function fitCamera() {
+  const e = slabExtent(turntable.rotation.y);
+  camera.zoom = 1 / Math.max(1, e.x / fitLimit.x, e.y / fitLimit.y);
+  camera.updateProjectionMatrix();
+}
+
+// The arm is a ruler laid against the slab. It keeps the resting angle (the court's near
+// line, carried out past the slab's side) and its resting depth into the slab's outline,
+// and starts where it leaves that outline. So however the court turns, the line stays
+// put in angle and simply slides along the slab's silhouette; at rest it is exactly the
+// original line. B, A: the resting arm's start and a point on the court line behind it.
+// rest, now: the slab's projected corners unturned and turned. gap: B's offset past the slab.
+const dot2 = (p, v) => p.x * v.x + p.y * v.y;
+const ARM_MIN_SLOPE = 0.26;
+function armStart(B, A, rest, now, gap) {
+  const len = Math.hypot(B.x - A.x, B.y - A.y); if (!len) return null;
+  let u = { x: (B.x - A.x) / len, y: (B.y - A.y) / len };
+  // As the camera drops towards level the court line flattens towards horizontal, and a
+  // ruler at that angle would run across the text instead of reaching the rule. It never
+  // lies shallower than about 15° (the resting angle is about 20°), so it always lands.
+  if (u.y < ARM_MIN_SLOPE) u = { x: (u.x > 0 ? 1 : -1) * Math.sqrt(1 - ARM_MIN_SLOPE ** 2), y: ARM_MIN_SLOPE };
+  let m = { x: -u.y, y: u.x };                                   // across the line, away from the slab
+  const mid = rest.reduce((s, p) => ({ x: s.x + p.x / rest.length, y: s.y + p.y / rest.length }), { x: 0, y: 0 });
+  if (dot2(mid, m) > dot2(B, m)) m = { x: u.y, y: -u.x };
+  const depth = Math.max(...rest.map(p => dot2(p, m))) - dot2(B, m);
+  const L = Math.max(...now.map(p => dot2(p, m))) - depth;
+  // The outline is the hull of the corners; any segment between two corners lies inside it,
+  // so the furthest crossing along u over all pairs is where the line leaves the slab.
+  let best = null, bestT = -Infinity;
+  for (let i = 0; i < now.length; i++) for (let j = i; j < now.length; j++) {
+    const p = now[i], q = now[j], sp = dot2(p, m) - L, sq = dot2(q, m) - L;
+    let w;
+    if (Math.abs(sp) < .5) w = 0; else if (Math.abs(sq) < .5) w = 1; else if (sp * sq < 0) w = sp / (sp - sq); else continue;
+    const x = p.x + (q.x - p.x) * w, y = p.y + (q.y - p.y) * w, t = x * u.x + y * u.y;
+    if (t > bestT) { bestT = t; best = { x, y }; }
+  }
+  if (!best) return null;
+  const off = dot2(best, m) - L;
+  return { x: best.x - m.x * off + u.x * gap, y: best.y - m.y * off + u.y * gap, u };
 }
 
 // A separate ink rule leaves the slab edge and joins the lower hero divider.
+// It runs every frame while the court moves, so it only writes what changed.
+let lineArm=null,lineRule=null,lineRuleY=null;
+const _s=new THREE.Vector3();
 function drawLine() {
  if(!lineSvg)return;
  const ruleY=hero.clientHeight-1;
- hero.style.setProperty('--art-rule-y',`${ruleY}px`);
- hero.style.setProperty('--art-rule-left','0px');
+ if(ruleY!==lineRuleY){
+  lineRuleY=ruleY;
+  hero.style.setProperty('--art-rule-y',`${ruleY}px`);
+  hero.style.setProperty('--art-rule-left','0px');
+ }
  if(hero.clientWidth<=860){
   lineSvg.classList.add('hidden');hero.classList.add('no-line');return;
  }
- const nearZ=sport==='football'?8:hl;
- const B=toHero(-SLAB_W/2-.16,-SLAB_T,nearZ),A=toHero(-hw,-SLAB_T,nearZ);
- const dx=B.x-A.x,dy=B.y-A.y;
- if(dy<=0||B.y>=ruleY){lineSvg.classList.add('hidden');hero.classList.add('no-line');return;}
- const distance=(ruleY-B.y)/dy,elbowX=B.x+dx*distance;
+ turntable.updateMatrixWorld();
+ const P=heroProjector(),nearZ=sport==='football'?8:hl;
+ const B=P(_s.set(-SLAB_W/2-.16,-SLAB_T,nearZ)),A=P(_s.set(-hw,-SLAB_T,nearZ)),side=P(_s.set(-SLAB_W/2,-SLAB_T,nearZ));
+ const arm=armStart(B,A,SLAB_CORNERS.map(P),SLAB_CORNERS.map(c=>P(_s.copy(c).applyMatrix4(turntable.matrixWorld))),Math.hypot(B.x-side.x,B.y-side.y));
+ if(!arm||arm.y>=ruleY){lineSvg.classList.add('hidden');hero.classList.add('no-line');return;}
  const f=n=>n.toFixed(2);
+ if(!lineArm){lineSvg.innerHTML='<path/><path/>';[lineArm,lineRule]=lineSvg.children;}
  lineSvg.setAttribute('viewBox',`0 0 ${hero.clientWidth} ${hero.clientHeight}`);
- lineSvg.innerHTML=`<path d="M ${f(B.x)} ${f(B.y)}${sidestepText(B,{x:elbowX,y:ruleY},ruleY,f)} M 0 ${f(ruleY)} H ${hero.clientWidth}"/>`;
+ const start={x:arm.x,y:arm.y},distance=(ruleY-start.y)/arm.u.y,elbowX=start.x+arm.u.x*distance;
+ lineArm.setAttribute('d',`M ${f(start.x)} ${f(start.y)}${sidestepText(start,{x:elbowX,y:ruleY},ruleY,f)}`);
+ lineRule.setAttribute('d',`M 0 ${f(ruleY)} H ${hero.clientWidth}`);
  lineSvg.classList.remove('hidden');hero.classList.remove('no-line');
 }
 
@@ -725,6 +836,7 @@ function frame(now) {
   renderQueued = false;
   if (!visible || document.hidden || contextLost) return;
   for (const a of anims) { if (a(now) === false) anims.delete(a); }
+  const viewMoving = stepView(now);
   renderer.render(scene, camera);
   if (!art.classList.contains('is-live')) {
     art.classList.add('is-live');
@@ -733,24 +845,78 @@ function frame(now) {
     controls.querySelectorAll('button[data-sport]').forEach(b=>b.disabled=false);
     art.setAttribute('aria-disabled','false');art.tabIndex=0;
   }
-  if (anims.size) requestRender();
+  if (anims.size || viewMoving) requestRender();
 }
 function animate(fn) { anims.add(fn); requestRender(); }
 
+// ---------- Turn and lean ----------
+// Kept apart from `anims`, which a sport change clears: the court still comes home.
+const TAU = Math.PI * 2;
+function stepView(now) {
+  if (!view.active) return false;
+  const dt = view.last === null ? 1 / 60 : Math.min((now - view.last) / 1000, 1 / 20);
+  view.last = now;
+  if (!view.drag?.turning) {
+    // Every whole turn is a resting angle, held by a gentle well (-sin pulls to the nearest).
+    // A fast spin barely feels the well or the friction and coasts round; as it slows, both
+    // take hold and it docks with a little overshoot.
+    const calm = 1 / (1 + (view.yawVel / 3) ** 2);
+    const acc = -30 * calm * Math.sin(view.yaw) - (1.2 + 6.8 * calm) * view.yawVel;
+    view.yawVel += acc * dt; view.yaw += view.yawVel * dt;
+    view.yaw -= TAU * Math.round(view.yaw / TAU);
+  }
+  const ease = 1 - Math.exp(-dt * 18);   // the lean keeps up with the mouse, softened by a frame or two
+  view.az += (view.azTo - view.az) * ease; view.lift += (view.liftTo - view.lift) * ease;
+  view.scroll += (view.scrollTo - view.scroll) * (1 - Math.exp(-dt * 10));
+  const settled = !view.drag?.turning && Math.abs(view.yaw) < 1e-4 && Math.abs(view.yawVel) < 1e-3 &&
+    Math.abs(view.azTo - view.az) < 1e-4 && Math.abs(view.liftTo - view.lift) < 1e-4 && Math.abs(view.scrollTo - view.scroll) < 1e-4;
+  if (settled) { view.yaw = view.yawVel = 0; view.az = view.azTo; view.lift = view.liftTo; view.scroll = view.scrollTo; view.active = false; view.last = null; }
+  applyView();
+  return !settled;
+}
+function applyView() { turntable.rotation.y = courtYaw(); placeCamera(); fitCamera(); drawLine(); }
+function wakeView() { if (!view.active) { view.active = true; view.last = null; } requestRender(); }
+// How far the artwork has scrolled away: 0 at the top of the page, 1 once it has left the top.
+function scrollProgress() {
+  if (reduceMotion.matches) return 0;
+  const bottom = art.getBoundingClientRect().bottom + scrollY;
+  return THREE.MathUtils.clamp(scrollY / Math.max(bottom, 1), 0, 1);
+}
+function restView() {
+  view.drag = null; view.yaw = view.yawVel = view.az = view.lift = view.azTo = view.liftTo = 0;
+  view.scroll = view.scrollTo = scrollProgress();
+  view.active = false; view.last = null; art.removeAttribute('data-turning');
+  applyView();
+}
+const canTurn = () => !contextLost && art.classList.contains('is-live');
+function endTurn() {
+  const d = view.drag; if (!d) return;
+  view.drag = null; art.removeAttribute('data-turning');
+  if (!d.turning) return;
+  if (reduceMotion.matches) { view.yaw = view.yawVel = 0; }
+  // A flick hands its speed to the court; a pause before letting go does not.
+  else view.yawVel = performance.now() - d.t > 80 ? 0 : THREE.MathUtils.clamp(d.vel, -30, 30);
+  wakeView();
+}
+addEventListener('scroll', () => {
+  const p = scrollProgress();
+  if (p !== view.scrollTo) { view.scrollTo = p; wakeView(); }
+}, { passive: true });
+
 new IntersectionObserver((entries) => {
   visible = entries[0].isIntersecting;
-  if (visible) requestRender(); else resetPoint();
+  if (visible) requestRender(); else { resetPoint(); restView(); }
 }, { threshold: 0.01 }).observe(art);
 
 new ResizeObserver(resize).observe(art);
 addEventListener('resize', drawLine);
 document.fonts?.ready.then(drawLine);
 
-document.addEventListener('visibilitychange', () => { if (!document.hidden) requestRender(); else resetPoint(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) requestRender(); else { resetPoint(); restView(); } });
 canvas.addEventListener('webglcontextlost', (e) => {
   e.preventDefault();
   contextLost = true;
-  stopPoint();
+  stopPoint(); restView();
   art.setAttribute('aria-label','A still illustration of the futevôlei court. Live graphics are temporarily unavailable.');
   canvas.setAttribute('aria-hidden','true');
   document.querySelectorAll('.art-controls button').forEach(b=>b.disabled=true);
@@ -785,11 +951,50 @@ function playPoint(){
  animate(pointTick);
 }
 let downAt=null,suppressClick=false;
-art.addEventListener('pointerdown',e=>{downAt={x:e.clientX,y:e.clientY};suppressClick=false;});
-art.addEventListener('pointercancel',()=>{downAt=null;suppressClick=true;});
+art.addEventListener('pointerdown',e=>{
+ downAt={x:e.clientX,y:e.clientY};suppressClick=false;
+ if(!canTurn()||(e.pointerType==='mouse'&&e.button!==0))return;
+ view.drag={id:e.pointerId,x:e.clientX,y:e.clientY,raw:0,turning:false,vel:0,t:e.timeStamp,yaw:0};
+});
+art.addEventListener('pointermove',e=>{
+ const d=view.drag;
+ if(d&&d.id===e.pointerId){
+  const dx=e.clientX-d.x;
+  if(!d.turning){
+   // Only a mostly horizontal pull turns the court; vertical stays page scroll.
+   if(Math.abs(dx)<5||Math.abs(dx)<Math.abs(e.clientY-d.y))return;
+   // Start from wherever the spring has carried the court by now.
+   d.turning=true;d.x=e.clientX;d.raw=view.yaw;d.yaw=view.yaw;d.t=e.timeStamp;suppressClick=true;
+   art.setPointerCapture?.(e.pointerId);art.setAttribute('data-turning','true');
+   view.yawVel=0;wakeView();return;
+  }
+  // No end stop: three quarters of a turn across the full width of the artwork.
+  view.yaw=d.raw+dx*(1.5*Math.PI)/Math.max(art.clientWidth,1);
+  const dt=Math.max(e.timeStamp-d.t,1)/1000;
+  d.vel=d.vel*.6+(view.yaw-d.yaw)/dt*.4;d.yaw=view.yaw;d.t=e.timeStamp;
+  wakeView();return;
+ }
+});
+// The camera leans towards the mouse anywhere over the hero, measured from the artwork's
+// centre and full at its edges, so moving across the text still moves the court.
+// Touch and pen never lean.
+hero.addEventListener('pointermove',e=>{
+ if(e.pointerType!=='mouse'||view.drag||reduceMotion.matches||!canTurn())return;
+ const r=art.getBoundingClientRect();
+ const nx=THREE.MathUtils.clamp((e.clientX-r.left)/r.width*2-1,-1,1);
+ const ny=THREE.MathUtils.clamp(1-(e.clientY-r.top)/r.height*2,-1,1);
+ view.azTo=nx*TILT_AZ;view.liftTo=ny;wakeView();   // top edge: flat plan; bottom edge: level
+});
+hero.addEventListener('pointerleave',e=>{
+ if(e.pointerType!=='mouse'||view.drag)return;
+ view.azTo=view.liftTo=0;wakeView();
+});
+art.addEventListener('pointercancel',()=>{downAt=null;suppressClick=true;endTurn();});
+art.addEventListener('lostpointercapture',endTurn);
 art.addEventListener('pointerup',e=>{
+ endTurn();
  if(!downAt)return;
- suppressClick=Math.hypot(e.clientX-downAt.x,e.clientY-downAt.y)>10;downAt=null;
+ if(Math.hypot(e.clientX-downAt.x,e.clientY-downAt.y)>10)suppressClick=true;downAt=null;
 });
 art.addEventListener('click',()=>{if(!suppressClick)playPoint();suppressClick=false;});
 art.addEventListener('keydown',e=>{
@@ -806,7 +1011,7 @@ controls.addEventListener('click',e=>{
  const button=e.target.closest('button[data-sport]');
  if(button&&!button.disabled)changeSport(button.dataset.sport);
 });
-reduceMotion.addEventListener('change',()=>{stopPoint();paintPoint(0);requestRender();});
+reduceMotion.addEventListener('change',()=>{stopPoint();restView();paintPoint(0);requestRender();});
 
 // Artwork export is exposed only by the local tools/artwork.html utility.
 canvas.addEventListener('court:export',()=>{
@@ -816,6 +1021,7 @@ canvas.addEventListener('court:export',()=>{
   const a=document.createElement('a');a.download=`court-${sport}.jpg`;a.href=composite.toDataURL('image/jpeg',.82);a.click();
 });
 resize();
+restView();   // a page opened part-way down starts with the court already turned to match
 
 })().catch(error => {
   console.warn('Court illustration unavailable; keeping the still artwork.', error);

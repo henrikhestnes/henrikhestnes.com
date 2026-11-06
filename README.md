@@ -12,6 +12,8 @@ Open `index.html` in a browser, or serve the directory with a static HTTP server
 
 Choose a sport, then tap/click anywhere on its court. One short sequence plays in the existing composition, with a fixed camera and constant ball scale. Tap again to restart. The court is keyboard focusable: Enter or Space plays, Escape stops and returns to its starting pose. There are no bounce buttons, action labels, zooms, timelines or replay panels.
 
+A horizontal drag spins the court about its centre under a fixed sun, so shadows sweep across the surface. There is no end stop: a drag turns it as far as you like, and a flick coasts on (a hard one goes round a few times). As it slows, it docks back at its resting angle with a little overshoot. Vertical drags still scroll the page. On desktop the camera follows the mouse anywhere over the hero, full at the artwork's edges: up to 15° sideways, and from level with the slab (mouse at the bottom) through the resting 34° (centre) to looking straight down at the flat court diagram (top), turning the court as it rises just as scrolling does. It settles when the mouse leaves the hero. Near level the court line flattens out, so the ink diagonal never lies shallower than about 15° and always reaches the rule. Scrolling the hero away lifts the camera until it looks straight down and turns the court so its length lies across the frame: by the time 70% of the artwork has scrolled out, the miniature has become a flat court diagram. It rises back to the resting view on the way up. Whenever spinning or leaning would carry the slab past the frame, the camera zooms out just enough to keep it in, and back as it returns; an edge the resting composition already crops (on phones) stays cropped. The ink diagonal stays on through all of it: it keeps its resting angle and slides along the slab's outline, so at rest it is exactly the original line. With reduced motion there is no lean or scroll motion, and a released court snaps straight back.
+
 - **Futevôlei:** four players, a burgundy-and-white FT-5-inspired ball, a set and a shark attack.
 - **Tennis:** two singles players, held rackets and a serve. Both feet stay behind the baseline through contact.
 - **Football:** an attacking-third vignette with five figures: the crosser, Haaland, two defenders and goalkeeper. A left-wing cross becomes a rising header into the corner. Norway’s red shirts, white shorts and red socks contrast with Brazil’s yellow shirts, blue shorts and white socks. Flags and country names appear on a physical banner along the far touchline. The penalty spot sits on the goal centreline inside the box, at 11/16.5 of the penalty-area depth ([IFAB Law 1](https://theifab.com/laws/latest/the-field-of-play/)).
@@ -22,7 +24,7 @@ Ball radii remain the same at rest and in motion: 0.20 scene units for futevôle
 
 ## Implementation and fallback
 
-- `scene.js`: geometry, materials, figures, fixed camera, atomic sport selection and on-demand rendering.
+- `scene.js`: geometry, materials, figures, the resting camera with its drag-to-spin, hover lean and scroll motion, atomic sport selection and on-demand rendering.
 - `shark-motion.js`: deterministic motion sampling, roster definitions and short sequence durations.
 - `index.html` / `style.css`: content and responsive presentation. The full name appears in the hero, document title and metadata.
 - `poster.jpg`: a 1200 × 840 still of the current futevôlei scene.
