@@ -636,6 +636,9 @@ function resize() {
   camera.top = viewH / 2; camera.bottom = -viewH / 2;
   camera.updateProjectionMatrix();
   drawLine();
+  // Resizing the canvas wipes it. ResizeObserver runs after this frame's rAF, so a
+  // queued render would land a frame late and the blank canvas would flash. Draw now.
+  if (visible && !document.hidden && !contextLost) renderer.render(scene, camera);
   requestRender();
 }
 
