@@ -236,7 +236,9 @@ canvas#court { display: block; touch-action: pan-y; cursor: pointer; }
   background: var(--ink);
   border: 1.5px solid var(--ink);
 }
+.index-why { margin: 0 0 1.25rem; }
 .index .pane { border: 0; }
+.index li:last-child:nth-child(odd) { grid-column: 1 / -1; }
 .index .pane-body p { font-size: 0.95rem; }
 
 @media (max-width: 700px) {
