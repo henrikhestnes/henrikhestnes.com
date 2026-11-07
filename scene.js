@@ -61,27 +61,33 @@ const target = new THREE.Vector3(0, -0.35, 0);
 const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 200);
 // The resting view is the composition. Three motions borrow from it: a horizontal drag
 // spins the court (yaw), the mouse leans the camera (az sideways, lift up and down), and
-// scrolling the hero away lifts the camera until it looks straight down (scroll, 0 → 1).
+// scrolling the hero away lowers the camera until it is level with the slab (scroll, 0 → 1).
 // Whenever a motion would push the slab out of frame, fitCamera zooms out just enough.
-const TILT_AZ = THREE.MathUtils.degToRad(15);
+const TILT_AZ = THREE.MathUtils.degToRad(10);
+// The mouse only nudges the view: at the artwork's top edge the camera rises to about 55°,
+// at the bottom it sinks to about 20°. The level view and its turn belong to scrolling.
+const LEAN_LIFT = 0.4;
 // Lift runs from -1 to 1. At 0 the camera is at its resting 34°; at -1 it is level with the
 // slab, seeing it edge-on; at 1 it looks straight down (just shy of 90°, where lookAt has
-// no "up") and the court is turned so its length lies across the frame. Seen from above, an
-// orthographic slab has no sides and the figures shrink to their footprints, leaving the
-// painted lines: a court diagram in the page's ink. The turn is the short way round (56°)
-// and is done by lift 0.4: turning while the camera is still low would stand the court's
-// length up the frame and force a large zoom-out.
+// no "up"). Dragging reaches both ends. Scrolling heads for level and turns the court so its
+// length lies across the frame: the slab closes to a thin bar with the net, posts and
+// figures standing on it in silhouette, a side elevation in the page's ink. The turn is the
+// short way round (56°), follows the scroll's share of the lift, and is done by 0.4, so
+// the court has its length across before the camera gets low.
 const FLAT_EL = THREE.MathUtils.degToRad(89.5), FLAT_TURN = 0.4;
-const FLAT_YAW = AZ + Math.PI / 2;            // the court's length along screen x when looking down
-// Scrolling flattens fully once 70% of the artwork has gone, so there is a moment to see it.
+const FLAT_YAW = AZ + Math.PI / 2;            // the court's length along screen x
+// Scrolling levels fully 70% of the way from the artwork being fully in view to it leaving
+// the top, so there is a moment to see it.
 const FLAT_AT = 0.7;
-const view = { yaw: 0, yawVel: 0, drag: null, az: 0, lift: 0, azTo: 0, liftTo: 0, scroll: 0, scrollTo: 0, last: null, active: false };
-// Scroll lifts first; the mouse moves within whatever range it leaves.
-function lift() { const s = THREE.MathUtils.smoothstep(view.scroll, 0, FLAT_AT); return s + (1 - s) * view.lift; }
-const courtYaw = () => view.yaw + THREE.MathUtils.smoothstep(lift(), 0, FLAT_TURN) * FLAT_YAW;
-// The sideways lean fades out as the court flattens, so the plan holds still.
+const view = { yaw: 0, yawVel: 0, drag: null, az: 0, lift: 0, pitch: 0, azTo: 0, liftTo: 0, scroll: 0, scrollTo: 0, last: null, active: false };
+// Scroll lowers first; the mouse moves within whatever range it leaves.
+const scrollLift = () => THREE.MathUtils.smoothstep(view.scroll, 0, FLAT_AT);
+// A vertical drag (pitch) adds to the mouse lean and can reach the whole range, level to plan.
+function lift() { const s = scrollLift(); return -s + (1 - s) * THREE.MathUtils.clamp(view.lift + view.pitch, -1, 1); }
+const courtYaw = () => view.yaw + THREE.MathUtils.smoothstep(scrollLift(), 0, FLAT_TURN) * FLAT_YAW;
+// The sideways lean fades out towards the plan and as scrolling levels the court, so both hold still.
 function placeCamera(
-  az = AZ + view.az * (1 - Math.max(0, lift())),
+  az = AZ + view.az * (1 - Math.max(0, lift())) * (1 - scrollLift()),
   el = lift() >= 0 ? THREE.MathUtils.lerp(EL, FLAT_EL, lift()) : EL * (1 + lift()),
 ) {
   camera.position.set(
@@ -668,7 +674,7 @@ function resize() {
   camera.updateProjectionMatrix();
   measureRest();
   turntable.rotation.y = courtYaw();
-  placeCamera(); fitCamera();
+  placeCamera(); fitCamera(); seatBar();
   drawLine();
   // Resizing the canvas wipes it. ResizeObserver runs after this frame's rAF, so a
   // queued render would land a frame late and the blank canvas would flash. Draw now.
@@ -688,6 +694,36 @@ function heroProjector() {
 }
 const SLAB_CORNERS = [];
 for (const x of [-SLAB_W / 2, SLAB_W / 2]) for (const z of [-SLAB_L / 2, SLAB_L / 2]) for (const y of [0, -SLAB_T]) SLAB_CORNERS.push(new THREE.Vector3(x, y, z));
+
+// ---------- Seat the level court on the rule ----------
+// As scrolling lowers the camera, the artwork slides down until the slab's lowest edge rests
+// on the hero's closing rule: seen level, the court is a bar standing on the page's own line.
+// The artwork is clipped at the rule so it never reaches over the next section, and the hint
+// underneath fades out of the way.
+const hint = art.parentElement.querySelector('.art-hint');
+let barShift = 0;
+const _low = new THREE.Vector3();
+function seatBar() {
+  const w = contextLost || art.classList.contains('no-webgl') ? 0 : scrollLift();
+  let shift = 0;
+  if (w > 0) {
+    turntable.updateMatrixWorld();
+    const P = heroProjector(), ruleY = hero.clientHeight - 1;
+    let low = -Infinity;
+    for (const c of SLAB_CORNERS) low = Math.max(low, P(_low.copy(c).applyMatrix4(turntable.matrixWorld)).y);
+    shift = Math.max(0, w * (ruleY - (low - barShift)));
+  }
+  if (Math.abs(shift - barShift) < 0.05 && (shift > 0) === (barShift > 0)) return;
+  // The artwork's top in the hero without the current shift (the box moves with its transform).
+  const top = art.getBoundingClientRect().top - hero.getBoundingClientRect().top - barShift;
+  barShift = shift;
+  if (!shift) { art.style.transform = art.style.clipPath = ''; if (hint) hint.style.opacity = ''; return; }
+  // Where the artwork's bottom would land below the rule, measured in its own layout box.
+  const below = top + art.offsetHeight + shift - (hero.clientHeight - 1);
+  art.style.transform = `translateY(${shift.toFixed(2)}px)`;
+  art.style.clipPath = below > 0 ? `inset(0 0 ${below.toFixed(2)}px 0)` : '';
+  if (hint) hint.style.opacity = String(1 - w);
+}
 
 // ---------- Keep the slab in frame ----------
 // Spinning and leaning can carry the slab's ends past the frame; the camera then zooms
@@ -724,10 +760,14 @@ function fitCamera() {
 // original line. B, A: the resting arm's start and a point on the court line behind it.
 // rest, now: the slab's projected corners unturned and turned. gap: B's offset past the slab.
 const dot2 = (p, v) => p.x * v.x + p.y * v.y;
-const ARM_MIN_SLOPE = 0.26;
+const ARM_MIN_SLOPE = 0.26, ARM_SWAY = THREE.MathUtils.degToRad(8);
 function armStart(B, A, rest, now, gap) {
   const len = Math.hypot(B.x - A.x, B.y - A.y); if (!len) return null;
   let u = { x: (B.x - A.x) / len, y: (B.y - A.y) / len };
+  // A little give: spinning or tilting the court by hand sways the ruler up to 8° either way,
+  // enough for its sidestep to come and go under the text, and it settles as the court does.
+  const sway = ARM_SWAY * THREE.MathUtils.clamp(Math.sin(view.yaw) + 0.5 * view.pitch, -1, 1);
+  if (sway) { const c = Math.cos(sway), s = Math.sin(sway); u = { x: u.x * c - u.y * s, y: u.x * s + u.y * c }; }
   // As the camera drops towards level the court line flattens towards horizontal, and a
   // ruler at that angle would run across the text instead of reaching the rule. It never
   // lies shallower than about 15° (the resting angle is about 20°), so it always lands.
@@ -784,18 +824,34 @@ function drawLine() {
 // The diagonal from P heads for Q on the bottom rule. If it would cross the hero
 // photo or text, it does not barge through: just before the words it makes a
 // polite sidestep away from them (towards the rule, where there is never text)
-// and carries on parallel to its old course until it reaches the rule.
-// Returns the path after P, ending on the rule.
+// and carries on parallel to its old course until it reaches the rule. The mouse
+// counts as one more word, so the line steps out of the way of a pointer too.
+// The step eases in and out rather than snapping. Returns the path after P, ending on the rule.
+let cursor=null;                                           // the mouse over the hero, in client coordinates
+const CURSOR_R=22;
+const bend={c:0,target:0,t0:0,last:null};
+const bendTick=()=>{drawLine();return !lineSvg.classList.contains('hidden')&&bend.c!==bend.target;};
+function easeBend(target,t0){
+ if(t0!==null)bend.t0=t0;
+ bend.target=target;
+ const now=performance.now();
+ if(bend.last===null||reduceMotion.matches)bend.c=target;
+ else bend.c+=(target-bend.c)*(1-Math.exp(-Math.min(now-bend.last,33)/1000*12));
+ bend.last=now;
+ if(Math.abs(target-bend.c)<.3)bend.c=target;
+ else if(!anims.has(bendTick))animate(bendTick);
+}
 function sidestepText(P,Q,ruleY,f){
  const L=Math.hypot(Q.x-P.x,Q.y-P.y);
  const straight=` L ${f(Q.x)} ${f(Q.y)}`;
  if(!L)return straight;
  const u={x:(Q.x-P.x)/L,y:(Q.y-P.y)/L},n={x:-u.y,y:u.x};   // u along the line, n across it
  const away=n.y>0?1:-1;                                    // the side of n that faces down, away from the text
- const hr=hero.getBoundingClientRect(),pad=14,rects=[];
+ const hr=hero.getBoundingClientRect(),pad=24,rects=[];
  const photo=hero.querySelector('.hero-photo');if(photo)rects.push(photo.getBoundingClientRect());
  const range=document.createRange();
  hero.querySelectorAll('.name,.tagline,.intro,.hero-links').forEach(el=>{range.selectNodeContents(el);rects.push(...range.getClientRects());});
+ if(cursor)rects.push({left:cursor.x-CURSOR_R,right:cursor.x+CURSOR_R,top:cursor.y-CURSOR_R,bottom:cursor.y+CURSOR_R,width:2*CURSOR_R,height:2*CURSOR_R});
  const boxes=[];
  for(const r of rects){
   if(!r.width||!r.height)continue;
@@ -808,13 +864,18 @@ function sidestepText(P,Q,ruleY,f){
  }
  let t0=Infinity,clear=0;
  for(const o of boxes)if(o.smin<0&&o.smax>0&&o.b>0&&o.a<L){t0=Math.min(t0,o.a);clear=Math.max(clear,o.smax);}
- if(t0===Infinity)return straight;
- // Stepping aside can walk the line into words further down; keep stepping until the new course is clear.
- for(let changed=true,i=0;changed&&i<8;i++){
-  changed=false;
-  for(const o of boxes)if(o.b>t0&&o.smin<clear+4&&o.smax>clear+4){clear=o.smax;changed=true;}
+ if(t0!==Infinity){
+  // Stepping aside can walk the line into words further down; keep stepping until the new course is clear.
+  for(let changed=true,i=0;changed&&i<8;i++){
+   changed=false;
+   for(const o of boxes)if(o.b>t0&&o.smin<clear+4&&o.smax>clear+4){clear=o.smax;changed=true;}
+  }
  }
- const h=(clear+4)*away,r=Math.max(40,clear*1.6),k=r*.55;
+ // Easing out keeps the last step's position until the line is straight again.
+ easeBend(t0===Infinity?0:clear+4,t0===Infinity?null:t0);
+ if(!bend.c)return straight;
+ t0=bend.t0;
+ const h=bend.c*away,r=Math.max(40,(bend.c-4)*1.6),k=r*.55;
  const ts=Math.max(0,t0-r);
  const p=(t,s)=>`${f(P.x+u.x*t+n.x*s)} ${f(P.y+u.y*t+n.y*s)}`;
  const tEnd=(ruleY-P.y-n.y*h)/u.y;                        // where the shifted course meets the rule
@@ -865,25 +926,30 @@ function stepView(now) {
     view.yawVel += acc * dt; view.yaw += view.yawVel * dt;
     view.yaw -= TAU * Math.round(view.yaw / TAU);
   }
-  const ease = 1 - Math.exp(-dt * 18);   // the lean keeps up with the mouse, softened by a frame or two
+  const ease = 1 - Math.exp(-dt * 6);    // the lean drifts after the mouse rather than tracking it
   view.az += (view.azTo - view.az) * ease; view.lift += (view.liftTo - view.lift) * ease;
+  if (!view.drag?.turning) view.pitch *= Math.exp(-dt * 7);   // a released tilt sinks back to rest
   view.scroll += (view.scrollTo - view.scroll) * (1 - Math.exp(-dt * 10));
-  const settled = !view.drag?.turning && Math.abs(view.yaw) < 1e-4 && Math.abs(view.yawVel) < 1e-3 &&
+  const settled = !view.drag?.turning && Math.abs(view.yaw) < 1e-4 && Math.abs(view.yawVel) < 1e-3 && Math.abs(view.pitch) < 1e-4 &&
     Math.abs(view.azTo - view.az) < 1e-4 && Math.abs(view.liftTo - view.lift) < 1e-4 && Math.abs(view.scrollTo - view.scroll) < 1e-4;
-  if (settled) { view.yaw = view.yawVel = 0; view.az = view.azTo; view.lift = view.liftTo; view.scroll = view.scrollTo; view.active = false; view.last = null; }
+  if (settled) { view.yaw = view.yawVel = view.pitch = 0; view.az = view.azTo; view.lift = view.liftTo; view.scroll = view.scrollTo; view.active = false; view.last = null; }
   applyView();
   return !settled;
 }
-function applyView() { turntable.rotation.y = courtYaw(); placeCamera(); fitCamera(); drawLine(); }
+function applyView() { turntable.rotation.y = courtYaw(); placeCamera(); fitCamera(); seatBar(); drawLine(); }
 function wakeView() { if (!view.active) { view.active = true; view.last = null; } requestRender(); }
-// How far the artwork has scrolled away: 0 at the top of the page, 1 once it has left the top.
+// How far the artwork has scrolled away: 0 until all of it is in view (or its top reaches the
+// top of the screen, if it is taller), 1 once it has left the top. Where the artwork sits
+// below the fold (phones, under the photo and name), the lift waits until it has been seen.
 function scrollProgress() {
   if (reduceMotion.matches) return 0;
-  const bottom = art.getBoundingClientRect().bottom + scrollY;
-  return THREE.MathUtils.clamp(scrollY / Math.max(bottom, 1), 0, 1);
+  const r = art.getBoundingClientRect(), vh = document.documentElement.clientHeight;
+  const top = r.top + scrollY, bottom = r.bottom + scrollY;
+  const start = Math.max(0, Math.min(top, bottom - vh));
+  return THREE.MathUtils.clamp((scrollY - start) / Math.max(bottom - start, 1), 0, 1);
 }
 function restView() {
-  view.drag = null; view.yaw = view.yawVel = view.az = view.lift = view.azTo = view.liftTo = 0;
+  view.drag = null; view.yaw = view.yawVel = view.pitch = view.az = view.lift = view.azTo = view.liftTo = 0;
   view.scroll = view.scrollTo = scrollProgress();
   view.active = false; view.last = null; art.removeAttribute('data-turning');
   applyView();
@@ -893,7 +959,7 @@ function endTurn() {
   const d = view.drag; if (!d) return;
   view.drag = null; art.removeAttribute('data-turning');
   if (!d.turning) return;
-  if (reduceMotion.matches) { view.yaw = view.yawVel = 0; }
+  if (reduceMotion.matches) { view.yaw = view.yawVel = view.pitch = 0; }
   // A flick hands its speed to the court; a pause before letting go does not.
   else view.yawVel = performance.now() - d.t > 80 ? 0 : THREE.MathUtils.clamp(d.vel, -30, 30);
   wakeView();
@@ -954,22 +1020,25 @@ let downAt=null,suppressClick=false;
 art.addEventListener('pointerdown',e=>{
  downAt={x:e.clientX,y:e.clientY};suppressClick=false;
  if(!canTurn()||(e.pointerType==='mouse'&&e.button!==0))return;
- view.drag={id:e.pointerId,x:e.clientX,y:e.clientY,raw:0,turning:false,vel:0,t:e.timeStamp,yaw:0};
+ view.drag={id:e.pointerId,mouse:e.pointerType==='mouse',x:e.clientX,y:e.clientY,raw:0,pitch:0,turning:false,vel:0,t:e.timeStamp,yaw:0};
 });
 art.addEventListener('pointermove',e=>{
  const d=view.drag;
  if(d&&d.id===e.pointerId){
-  const dx=e.clientX-d.x;
+  const dx=e.clientX-d.x,dy=e.clientY-d.y;
   if(!d.turning){
-   // Only a mostly horizontal pull turns the court; vertical stays page scroll.
-   if(Math.abs(dx)<5||Math.abs(dx)<Math.abs(e.clientY-d.y))return;
-   // Start from wherever the spring has carried the court by now.
-   d.turning=true;d.x=e.clientX;d.raw=view.yaw;d.yaw=view.yaw;d.t=e.timeStamp;suppressClick=true;
+   // A mouse drag grabs the court in any direction. On touch only a mostly horizontal pull
+   // does, so a vertical swipe still scrolls the page; once grabbed, it tilts as well.
+   if(Math.hypot(dx,dy)<5||(!d.mouse&&Math.abs(dx)<Math.abs(dy)))return;
+   // Start from wherever the springs have carried the court by now.
+   d.turning=true;d.x=e.clientX;d.y=e.clientY;d.raw=view.yaw;d.pitch=view.pitch;d.yaw=view.yaw;d.t=e.timeStamp;suppressClick=true;
    art.setPointerCapture?.(e.pointerId);art.setAttribute('data-turning','true');
    view.yawVel=0;wakeView();return;
   }
   // No end stop: three quarters of a turn across the full width of the artwork.
   view.yaw=d.raw+dx*(1.5*Math.PI)/Math.max(art.clientWidth,1);
+  // Pulling down raises the camera; the artwork's full height sweeps from level to plan.
+  view.pitch=THREE.MathUtils.clamp(d.pitch+dy*2/Math.max(art.clientHeight,1),-1-view.lift,1-view.lift);
   const dt=Math.max(e.timeStamp-d.t,1)/1000;
   d.vel=d.vel*.6+(view.yaw-d.yaw)/dt*.4;d.yaw=view.yaw;d.t=e.timeStamp;
   wakeView();return;
@@ -983,8 +1052,13 @@ hero.addEventListener('pointermove',e=>{
  const r=art.getBoundingClientRect();
  const nx=THREE.MathUtils.clamp((e.clientX-r.left)/r.width*2-1,-1,1);
  const ny=THREE.MathUtils.clamp(1-(e.clientY-r.top)/r.height*2,-1,1);
- view.azTo=nx*TILT_AZ;view.liftTo=ny;wakeView();   // top edge: flat plan; bottom edge: level
+ // Gentle near the centre, full at the edges, so small movements barely stir the court.
+ const soft=n=>Math.sign(n)*Math.abs(n)**1.8;
+ view.azTo=soft(nx)*TILT_AZ;view.liftTo=soft(ny)*LEAN_LIFT;wakeView();
 });
+// The line steps aside for the mouse as it does for words.
+hero.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'){cursor={x:e.clientX,y:e.clientY};drawLine();}});
+hero.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'){cursor=null;drawLine();}});
 hero.addEventListener('pointerleave',e=>{
  if(e.pointerType!=='mouse'||view.drag)return;
  view.azTo=view.liftTo=0;wakeView();
